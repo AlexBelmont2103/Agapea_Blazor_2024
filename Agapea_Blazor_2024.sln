@@ -9,6 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agapea_Blazor_2024.Client",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agapea_Blazor_2024.Shared", "Agapea-Blazor-2024\Shared\Agapea_Blazor_2024.Shared.csproj", "{79ECB913-EB84-4D44-B390-9A4D7E4905C3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución", "Elementos de la solución", "{08CE23BE-660C-4D96-B283-30FCFA93B2E5}"
+	ProjectSection(SolutionItems) = preProject
+		LEEME_PAQUETE_NUGET_INSTALAR.txt = LEEME_PAQUETE_NUGET_INSTALAR.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
