@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Mail;
-using Agapea_Blazor_2024.Server.Models.Services.Interfaces;
+using Agapea_Blazor_2024.Server.Models.Services;
 
 namespace agapea_netcore_mvc_23_24.Models.Servicios
 {

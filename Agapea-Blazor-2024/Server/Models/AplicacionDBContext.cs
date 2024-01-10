@@ -21,7 +21,7 @@ namespace Agapea_Blazor_2024.Server.Models
         #region ... propiedades de la clase AplicacionDBContext ...
         //Definimos un DbSet por cada clase modelo a mapear en el DbContext como propiedad ...
         public DbSet<Direccion> Direcciones { get; set; }
-        public DbSet<Libro> Libros { get; set; }
+        //public DbSet<Libro> Libros { get; set; }
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<ItemPedido> ItemsPedido { get; set; }
         //public DbSet<Categoria> Categorias { get; set; }
@@ -80,6 +80,7 @@ namespace Agapea_Blazor_2024.Server.Models
 
             #endregion
             #region /// CREACION DE TABLA LIBROS A PARTIR DE LA CLASE MODELO LIBRO ///
+            /*
             builder.Entity<Libro>().ToTable("Libros");
             builder.Entity<Libro>().HasKey((Libro lib) => lib.ISBN13);
             builder.Entity<Libro>().Property((Libro lib) => lib.IdCategoria).IsRequired().HasMaxLength(250);
@@ -94,6 +95,7 @@ namespace Agapea_Blazor_2024.Server.Models
             builder.Entity<Libro>().Property((Libro lib) => lib.Resumen).IsRequired();
             builder.Entity<Libro>().Property((Libro lib) => lib.NumeroPaginas).IsRequired();
             builder.Entity<Libro>().Property((Libro lib) => lib.Precio).IsRequired();
+            */
             #endregion
             #region /// CREACION DE TABLA ITEMMSPEDIDO A PARTIR DE LA CLASE MODELO ITEMPEDIDO 
             builder.Entity<ItemPedido>().ToTable("ItemsPedido");
@@ -136,11 +138,7 @@ namespace Agapea_Blazor_2024.Server.Models
             #endregion
             #region /// CREACION DE TABLA CATEGORIAS A PARTIR DE LA CLASE MODELO CATEGORIA
             //Esta tabla ya existe en la BD, pero la creamos a traves de EF para poder usarla en el contexto de la aplicacion
-            /*
-            builder.Entity<Categoria>().ToTable("Categorias");
-            builder.Entity<Categoria>().HasKey((Categoria cat) => cat.IdCategoria);
-            builder.Entity<Categoria>().Property((Categoria cat) => cat.NombreCategoria).IsRequired().HasMaxLength(250);
-             */
+            
 
             #endregion
         }

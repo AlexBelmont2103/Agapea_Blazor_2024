@@ -21,7 +21,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
 
         public async Task<RestMessage> RegistrarCliente(Cliente NuevoCliente)
         {
-            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Cliente>("api/RESTCliente/RegistrarCliente", NuevoCliente);
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Cliente>("api/RESTCliente/Registro", NuevoCliente);
             RestMessage _bodyResp = await _resp.Content.ReadFromJsonAsync<RestMessage>();
             return _bodyResp;
         }

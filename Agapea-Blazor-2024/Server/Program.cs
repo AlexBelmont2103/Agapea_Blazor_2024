@@ -52,8 +52,10 @@ builder.Services.AddIdentity<MiClienteIdentity, IdentityRole>(
         };
     }
     )
-    .AddEntityFrameworkStores<AplicacionDBContext>(); // <== Saltará excepcion a la hora de validar emails cuando Identity genera token de activacion
+    .AddEntityFrameworkStores<AplicacionDBContext>().AddDefaultTokenProviders(); // <== Saltará excepcion a la hora de validar emails cuando Identity genera token de activacion
                                                       // porque no existe un proveedor de tokens por defecto: AddTokenProvider()
+                                                      // Solucion: crear un proveedor de tokens personalizado
+
 
 //Inyeccion  servicio de envio de emails
 builder.Services.AddScoped<IClienteCorreo, MailjetService>();
