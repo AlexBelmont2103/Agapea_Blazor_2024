@@ -21,11 +21,10 @@ namespace Agapea_Blazor_2024.Server.Models
         #region ... propiedades de la clase AplicacionDBContext ...
         //Definimos un DbSet por cada clase modelo a mapear en el DbContext como propiedad ...
         public DbSet<Direccion> Direcciones { get; set; }
-        public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Libro> Libros { get; set; }
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<ItemPedido> ItemsPedido { get; set; }
-        public DbSet<Categoria> Categorias { get; set; }
+        //public DbSet<Categoria> Categorias { get; set; }
 
 
         #endregion
@@ -46,6 +45,7 @@ namespace Agapea_Blazor_2024.Server.Models
             //IdentityUser tiene una propiedad llamada Email que es el email del usuario
             //IdentityUser tiene una propiedad llamada PasswordHash que es el hash de la contraseña del usuario
             //IdentityUser tiene una propiedad llamada PhoneNumber que es el numero de telefono del usuario
+
             builder.Entity<MiClienteIdentity>();
             #endregion
 
@@ -98,6 +98,7 @@ namespace Agapea_Blazor_2024.Server.Models
             #region /// CREACION DE TABLA ITEMMSPEDIDO A PARTIR DE LA CLASE MODELO ITEMPEDIDO 
             builder.Entity<ItemPedido>().ToTable("ItemsPedido");
             //Serializamos la propiedad LibroItem de la clase ItemPedido para poder almacenarla en una columna de la tabla ItemsPedido
+            builder.Entity<ItemPedido>().HasNoKey();
             builder.Entity<ItemPedido>().Property((ItemPedido item) => item.LibroItem)
                 .HasConversion(
                                libro => JsonSerializer.Serialize<Libro>(libro, (JsonSerializerOptions)null),
@@ -134,9 +135,13 @@ namespace Agapea_Blazor_2024.Server.Models
             builder.Entity<Pedido>().Property((Pedido ped) => ped.EstadoPedido).IsRequired().HasMaxLength(50);
             #endregion
             #region /// CREACION DE TABLA CATEGORIAS A PARTIR DE LA CLASE MODELO CATEGORIA
+            //Esta tabla ya existe en la BD, pero la creamos a traves de EF para poder usarla en el contexto de la aplicacion
+            /*
             builder.Entity<Categoria>().ToTable("Categorias");
             builder.Entity<Categoria>().HasKey((Categoria cat) => cat.IdCategoria);
             builder.Entity<Categoria>().Property((Categoria cat) => cat.NombreCategoria).IsRequired().HasMaxLength(250);
+             */
+
             #endregion
         }
         #endregion

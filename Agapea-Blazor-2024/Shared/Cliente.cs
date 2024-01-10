@@ -25,7 +25,7 @@ namespace Agapea_Blazor_2024.Shared
 
         public String Genero { get; set; } = "";
         public String Descripcion { get; set; } = ""; //intereses, etc...
-
+        public DateTime FechaNacimiento { get; set; } = DateTime.Now;
         //credenciales o cuenta del usuario...
         public Cuenta Credenciales { get; set; } = new Cuenta();
         public List<Direccion> DireccionesCliente { get; set; } = new List<Direccion>();
@@ -33,6 +33,7 @@ namespace Agapea_Blazor_2024.Shared
         public List<Pedido> PedidosCliente { get; set; } = new List<Pedido>();
 
         public List<Opinion> OpinionesCliente { get; set; } = new List<Opinion>();
+        
         #endregion
 
         #region Métodos de clase

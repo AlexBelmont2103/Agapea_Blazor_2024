@@ -11,17 +11,6 @@
         public String Pais { get; set; } = "España";
         public Boolean EsPrincipal { get; set; } = false;
         public Boolean EsFacturacion { get; set; } = false;
-        /*
-         public string? ProvinciaDirecString
-        {
-        get
-        {
-            return this.ProvinciaDirec != null ? this.ProvinciaDirec.CPRO + '-' + this.ProvinciaDirec.PRO : null;
-        }
-        }
-         
-         */
-
         #endregion
     }
 }

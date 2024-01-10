@@ -11,7 +11,7 @@ namespace Agapea_Blazor_2024.Server.Models
         public String Apellidos { get; set; }
         public String NIF { get; set; }
         public DateTime FechaNacimiento { get; set; }
-        public String genero { get; set; }
+        public String Genero { get; set; }
         public String Descripcion { get; set; }
         public String ImagenAvatarBASE64 { get; set; }
         #endregion
