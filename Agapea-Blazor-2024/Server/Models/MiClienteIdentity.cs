@@ -2,7 +2,7 @@
 
 namespace Agapea_Blazor_2024.Server.Models
 {
-    public class MiClienteIdentity:IdentityUser
+    public class MiClienteIdentity : IdentityUser
     {
         //Clase personalizada para añadir sobre las props de identityuser datos propios que me interesan y que Identity no refleja
         #region ... propiedades nuevas que añado a la clase MiClienteIdentity ...

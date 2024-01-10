@@ -13,9 +13,9 @@ namespace Agapea_Blazor_2024.Server.Models
             EF te obliga a sobrecargar el constructor (si no lo pones, salta un error indicándote lo que debes hacer)
          */
 
-        public AplicacionDBContext(DbContextOptions<AplicacionDBContext> options):base(options)
+        public AplicacionDBContext(DbContextOptions<AplicacionDBContext> options) : base(options)
         {
-            
+
         }
 
         #region ... propiedades de la clase AplicacionDBContext ...
@@ -46,7 +46,7 @@ namespace Agapea_Blazor_2024.Server.Models
             //IdentityUser tiene una propiedad llamada Email que es el email del usuario
             //IdentityUser tiene una propiedad llamada PasswordHash que es el hash de la contraseña del usuario
             //IdentityUser tiene una propiedad llamada PhoneNumber que es el numero de telefono del usuario
-            builder.Entity<MiClienteIdentity>()
+            builder.Entity<MiClienteIdentity>();
             #endregion
 
             #region /// CREACION DE TABLA DIRECCIONES A PARTIR DE LA CLASE MODELO DIRECCION ///
@@ -60,12 +60,83 @@ namespace Agapea_Blazor_2024.Server.Models
             //Solucion: o no almacenas esa prop como columna en la tabla o la serializas a un tipo de dato que si pueda almacenarse en una columna
             // .HasConversion() es un metodo de EF que permite serializar una clase a un tipo de dato que si pueda almacenarse en una columna
             // .HasConversion(1º param lambda serializacion, 2º param lambda deserializacion)
-            builder.Entity<Direccion>().Property((Direccion dir) => dir.Pais)
+            /*
+             //Podemos intentar almacenar solamente la propiedad CPRO + la propiedad PRO de la clase Provincia en la tabla Direcciones
+             builder.Entity<Direccion>().Property((Direccion dir) => dir.ProvinciaDirecString).IsRequired();
+             */
+            builder.Entity<Direccion>().Property((Direccion dir) => dir.ProvinciaDirec)
                 .HasConversion(
-                    prov => JsonSerializer.Serialize<Provincia>(prov, (JsonSerializerOptions)null),
-                    prov => JsonSerializer.Deserialize<Provincia>(prov, (JsonSerializerOptions)null)
-                );
-                
+                prov => JsonSerializer.Serialize<Provincia>(prov, (JsonSerializerOptions)null),
+                prov => JsonSerializer.Deserialize<Provincia>(prov, (JsonSerializerOptions)null)
+                               ).HasColumnName("Provincia");
+            builder.Entity<Direccion>().Property((Direccion dir) => dir.MunicipioDirec)
+                .HasConversion(
+                muni => JsonSerializer.Serialize<Municipio>(muni, (JsonSerializerOptions)null),
+                muni => JsonSerializer.Deserialize<Municipio>(muni, (JsonSerializerOptions)null)
+                               ).HasColumnName("Municipio");
+            builder.Entity<Direccion>().Property((Direccion dir) => dir.Pais).IsRequired().HasMaxLength(50);
+            builder.Entity<Direccion>().Property((Direccion dir) => dir.EsPrincipal).IsRequired().HasDefaultValue(false);
+            builder.Entity<Direccion>().Property((Direccion dir) => dir.EsFacturacion).IsRequired().HasDefaultValue(false);
+
+            #endregion
+            #region /// CREACION DE TABLA LIBROS A PARTIR DE LA CLASE MODELO LIBRO ///
+            builder.Entity<Libro>().ToTable("Libros");
+            builder.Entity<Libro>().HasKey((Libro lib) => lib.ISBN13);
+            builder.Entity<Libro>().Property((Libro lib) => lib.IdCategoria).IsRequired().HasMaxLength(250);
+            builder.Entity<Libro>().Property((Libro lib) => lib.Titulo).IsRequired().HasMaxLength(250);
+            builder.Entity<Libro>().Property((Libro lib) => lib.Editorial).IsRequired().HasMaxLength(250);
+            builder.Entity<Libro>().Property((Libro lib) => lib.Autores).IsRequired().HasMaxLength(250);
+            builder.Entity<Libro>().Property((Libro lib) => lib.ImagenLibroBASE64).IsRequired();
+            builder.Entity<Libro>().Property((Libro lib) => lib.Edicion).IsRequired().HasMaxLength(250);
+            builder.Entity<Libro>().Property((Libro lib) => lib.Dimensiones).IsRequired().HasMaxLength(250);
+            builder.Entity<Libro>().Property((Libro lib) => lib.Idioma).IsRequired().HasMaxLength(50);
+            builder.Entity<Libro>().Property((Libro lib) => lib.ISBN10).IsRequired().HasMaxLength(10);
+            builder.Entity<Libro>().Property((Libro lib) => lib.Resumen).IsRequired();
+            builder.Entity<Libro>().Property((Libro lib) => lib.NumeroPaginas).IsRequired();
+            builder.Entity<Libro>().Property((Libro lib) => lib.Precio).IsRequired();
+            #endregion
+            #region /// CREACION DE TABLA ITEMMSPEDIDO A PARTIR DE LA CLASE MODELO ITEMPEDIDO 
+            builder.Entity<ItemPedido>().ToTable("ItemsPedido");
+            //Serializamos la propiedad LibroItem de la clase ItemPedido para poder almacenarla en una columna de la tabla ItemsPedido
+            builder.Entity<ItemPedido>().Property((ItemPedido item) => item.LibroItem)
+                .HasConversion(
+                               libro => JsonSerializer.Serialize<Libro>(libro, (JsonSerializerOptions)null),
+                                              libro => JsonSerializer.Deserialize<Libro>(libro, (JsonSerializerOptions)null)
+                                                                            ).HasColumnName("LibroItem");
+            builder.Entity<ItemPedido>().Property((ItemPedido item) => item.CantidadItem).IsRequired();
+
+            #endregion
+            #region /// CREACION DE TABLA PEDIDOS A PARTIR DE LA CLASE MODELO PEDIDO
+            builder.Entity<Pedido>().ToTable("Pedidos");
+            builder.Entity<Pedido>().HasKey((Pedido ped) => ped.IdPedido);
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.FechaPedido).IsRequired();
+            //Serializamos la propiedad ElementosPedido de la clase Pedido para poder almacenarla en una columna de la tabla Pedidos
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.ElementosPedido)
+                .HasConversion(
+                 items => JsonSerializer.Serialize<List<ItemPedido>>(items, (JsonSerializerOptions)null),
+                 items => JsonSerializer.Deserialize<List<ItemPedido>>(items, (JsonSerializerOptions)null)
+                          ).HasColumnName("ElementosPedido");
+            //Serializamos la propiedad DireccionEnvio de la clase Pedido para poder almacenarla en una columna de la tabla Pedidos
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.DireccionEnvio)
+                .HasConversion(
+                 dir => JsonSerializer.Serialize<Direccion>(dir, (JsonSerializerOptions)null),
+                 dir => JsonSerializer.Deserialize<Direccion>(dir, (JsonSerializerOptions)null)
+                          ).HasColumnName("DireccionEnvio");
+            //Serializamos la propiedad DireccionFacturacion de la clase Pedido para poder almacenarla en una columna de la tabla Pedidos
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.DireccionFacturacion)
+                .HasConversion(
+                 dir => JsonSerializer.Serialize<Direccion>(dir, (JsonSerializerOptions)null),
+                 dir => JsonSerializer.Deserialize<Direccion>(dir, (JsonSerializerOptions)null)
+                          ).HasColumnName("DireccionFacturacion");
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.SubTotal).IsRequired();
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.GastosEnvio).IsRequired();
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.Total).IsRequired();
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.EstadoPedido).IsRequired().HasMaxLength(50);
+            #endregion
+            #region /// CREACION DE TABLA CATEGORIAS A PARTIR DE LA CLASE MODELO CATEGORIA
+            builder.Entity<Categoria>().ToTable("Categorias");
+            builder.Entity<Categoria>().HasKey((Categoria cat) => cat.IdCategoria);
+            builder.Entity<Categoria>().Property((Categoria cat) => cat.NombreCategoria).IsRequired().HasMaxLength(250);
             #endregion
         }
         #endregion

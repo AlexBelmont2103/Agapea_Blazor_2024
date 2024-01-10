@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.ResponseCompression;
-
 var builder = WebApplication.CreateBuilder(args);
 
 /*  --- CONFIGURACION DE IDENTITY CON ENTITY FRAMEWORK ---

@@ -1,5 +1,4 @@
 ﻿using Agapea_Blazor_2024.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Agapea_Blazor_2024.Server.Controllers

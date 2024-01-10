@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Agapea_Blazor_2024.Shared
+﻿namespace Agapea_Blazor_2024.Shared
 {
     public class RestMessage
     {
@@ -12,7 +6,7 @@ namespace Agapea_Blazor_2024.Shared
 
         #region propiedades de la clase RestMessage
 
-        public int Codigo { get; set; }=0;
+        public int Codigo { get; set; } = 0;
         public String Mensaje { get; set; } = "";
         public String Error { get; set; } = "";
         public String TokenSesion { get; set; } = "";
