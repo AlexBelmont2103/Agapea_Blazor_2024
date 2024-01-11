@@ -119,6 +119,63 @@ namespace Agapea_Blazor_2024.Server.Controllers
             }
 
         }
+
+        [HttpPost]
+        [Route("Login")]
+        public async Task<RestMessage> LoginCliente(Cuenta credenciales)
+        {
+            try
+            {
+                //1º: Usando el servicio SignInManager de Identity, comprobar si las credenciales de login son correctas
+                MiClienteIdentity _clienteALoguear = await this._userManagerService.FindByEmailAsync(credenciales.Email);
+                if (_clienteALoguear == null)
+                {
+                    throw new Exception("Error al hacer login: El cliente no existe");
+                }
+                Microsoft.AspNetCore.Identity.SignInResult _resultadoLogin = await this._signInManagerService.PasswordSignInAsync(_clienteALoguear, credenciales.Password, false, false);
+                if (!_resultadoLogin.Succeeded)
+                {
+                    throw new Exception("Error al hacer login: " + _resultadoLogin.ToString());
+                }
+                //2º: Si las credenciales son correctas, generar un token de sesion y devolverlo al cliente
+                String _tokenSesion = await this._userManagerService.GenerateUserTokenAsync(_clienteALoguear, "Default", "tokenSesion");
+                return new RestMessage()
+                {
+                    Codigo = 0,
+                    Mensaje = "Login correcto",
+                    Error = "",
+                    TokenSesion = _tokenSesion,
+                    DatosCliente = new Cliente()
+                    {
+                        Nombre = _clienteALoguear.Nombre,
+                        Apellidos = _clienteALoguear.Apellidos,
+                        Genero = _clienteALoguear.Genero,
+                        Descripcion = _clienteALoguear.Descripcion,
+                        Telefono = _clienteALoguear.PhoneNumber,
+                        Credenciales = new Cuenta()
+                        {
+                            Login = _clienteALoguear.UserName,
+                            Password = credenciales.Password,
+                            Email = _clienteALoguear.Email,
+                            ImagenCuentaBASE64 = _clienteALoguear.ImagenAvatarBASE64
+                        }
+                    },
+                    OtrosDatos = null
+                };
+            }
+            catch(Exception ex)
+            {
+                return new RestMessage()
+                {
+                    Codigo = 1,
+                    Mensaje = "Error al hacer login: " + ex.Message,
+                    Error = ex.Message,
+                    TokenSesion = null,
+                    DatosCliente = null,
+                    OtrosDatos = null
+                };
+            }
+        }
         #endregion
     }
 }

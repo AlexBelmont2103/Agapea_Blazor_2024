@@ -1,4 +1,8 @@
 ﻿@page "/Cliente/Login"
+@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inject IJSRuntime jsService
+@inject IRestService restService
+@inject NavigationManager navManager
 
 <div class="container pt-5">
     <div class="row">
@@ -20,19 +24,19 @@
 
             <div asp-validation-summary="All" class="text-danger"></div>
 
-            <EditForm>
+            <EditForm Model="CuentaLogin" OnValidSubmit="LoginCliente">
                 <h4>Identifícate con:</h4>
 
                 <p>Usuario de <img src="~/images/agapea-logo.svg" alt="" width="123" height="60"></p>
 
                 <div class="form-floating m-1">
-                    <input type="email" class="form-control" id="Email" placeholder="Mi usuario" />
+                    <input type="email" class="form-control" id="Email" placeholder="Mi usuario" @bind-value="CuentaLogin.Email" />
                     <span class="text-danger" ></span>
                     <label for="floatingInput">Email</label>
                 </div>
 
                 <div class="form-floating m-1">
-                    <input type="password" class="form-control" id="Contraseña" placeholder="Contraseña" />
+                    <input type="password" class="form-control" id="Contraseña" placeholder="Contraseña" @bind-value="CuentaLogin.Password" />
                     <span class="text-danger" ></span>
                     <label for="floatingPassword"><small>Contraseña</small></label>
                 </div>
@@ -56,5 +60,25 @@
 
 
 @code {
-
+    #region ... propiedades componente login
+    Cuenta CuentaLogin = new Cuenta();
+    #endregion
+    #region ... metodos componente login
+    public async Task LoginCliente()
+    {
+        //Pasar por ajax datos de la cuenta al servicio RESTFUL montado en el servidor asp.net core
+        await jsService.InvokeVoidAsync("console.log", CuentaLogin);
+        RestMessage _resp = await restService.LoginCliente(CuentaLogin);
+        await jsService.InvokeVoidAsync("console.log", _resp);
+        if (_resp.Codigo == 0)
+        {
+            navManager.NavigateTo("/");
+        }
+        else
+        {
+            //Mostrar mensaje en la vista del componente...
+        }
+        
+    }
+    #endregion
 }

@@ -16,7 +16,9 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         #region metodos del servicio
         public async Task<RestMessage> LoginCliente(Cuenta credenciales)
         {
-            throw new NotImplementedException();
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Cuenta>("api/RESTCliente/Login", credenciales);
+            RestMessage _bodyResp = await _resp.Content.ReadFromJsonAsync<RestMessage>();
+            return _bodyResp;
         }
 
         public async Task<RestMessage> RegistrarCliente(Cliente NuevoCliente)
