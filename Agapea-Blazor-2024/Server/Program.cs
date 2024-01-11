@@ -1,11 +1,15 @@
 using Agapea_Blazor_2024.Server.Models;
 using Agapea_Blazor_2024.Server.Models.Services;
 using agapea_netcore_mvc_23_24.Models.Servicios;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,9 +57,28 @@ builder.Services.AddIdentity<MiClienteIdentity, IdentityRole>(
     }
     )
     .AddEntityFrameworkStores<AplicacionDBContext>().AddDefaultTokenProviders(); // <== Saltará excepcion a la hora de validar emails cuando Identity genera token de activacion
-                                                      // porque no existe un proveedor de tokens por defecto: AddTokenProvider()
-                                                      // Solucion: crear un proveedor de tokens personalizado
+                                                                                 // porque no existe un proveedor de tokens por defecto: AddTokenProvider()
+                                                                                 // Solucion: crear un proveedor de tokens personalizado
 
+
+//Configuracion servicio de generacion de tokens de activacion de cuentas de usuario
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // <= Cambia el esquema de autenticacion por defecto de cookies a JWT
+    .AddJwtBearer(
+    //Configuracion de JWT
+    (JwtBearerOptions opciones) =>
+    {
+        //Configuracion de la validacion de los claims de los JWT recibidos desde el cliente blazor
+        opciones.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+        {
+            ValidateIssuer = true, //Validar el emisor del token (claim "iss")
+            ValidateLifetime = true, //Validar la fecha de caducidad del token (claim "exp")
+            ValidateIssuerSigningKey = true, //Validar la firma del token (claim "sign")
+            ValidateAudience = false, //Validar subdominios para los que es válido el token (claim "aud")
+            ValidIssuer = builder.Configuration["JWT:issuer"], //Establecer el emisor del token
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:firma"])), //Establecer la clave de firma del token
+        };
+    }
+    ); // <= Configuracion de la comprobacion de los claims de los JWT recibidos desde el cliente blazor
 
 //Inyeccion  servicio de envio de emails
 builder.Services.AddScoped<IClienteCorreo, MailjetService>();

@@ -3,6 +3,7 @@
 @inject IJSRuntime jsService
 @inject IRestService restService
 @inject NavigationManager navManager
+@inject IStorageService storageService
 
 <div class="container pt-5">
     <div class="row">
@@ -25,8 +26,16 @@
             <div asp-validation-summary="All" class="text-danger"></div>
 
             <EditForm Model="CuentaLogin" OnValidSubmit="LoginCliente">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
                 <h4>Identifícate con:</h4>
-
+                <!-- --------- mensajes de error del servicio rest server ------------- -->
+                @if (!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @MensajeError
+                    </div>
+                }
+                <!-- ------------------------ -->
                 <p>Usuario de <img src="~/images/agapea-logo.svg" alt="" width="123" height="60"></p>
 
                 <div class="form-floating m-1">
@@ -61,7 +70,8 @@
 
 @code {
     #region ... propiedades componente login
-    Cuenta CuentaLogin = new Cuenta();
+    public Cuenta CuentaLogin = new Cuenta();
+    public String MensajeError { get; set; } = "";
     #endregion
     #region ... metodos componente login
     public async Task LoginCliente()
@@ -72,11 +82,17 @@
         await jsService.InvokeVoidAsync("console.log", _resp);
         if (_resp.Codigo == 0)
         {
+            //Guardar en el localstorage el token de la cuenta
+            //O en un servicio utilizando observables
+            await this.storageService.AlmacenamientoJWTAsync(_resp.TokenSesion);
+            await this.storageService.AlmacenamientoDatosClienteAsync(_resp.DatosCliente);
             navManager.NavigateTo("/");
         }
         else
         {
             //Mostrar mensaje en la vista del componente...
+            this.MensajeError = _resp.Mensaje + "..." + _resp.Error;
+
         }
         
     }

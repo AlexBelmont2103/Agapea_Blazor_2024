@@ -4,6 +4,7 @@ using Agapea_Blazor_2024.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Web;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Agapea_Blazor_2024.Server.Controllers
 {
@@ -132,7 +133,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 {
                     throw new Exception("Error al hacer login: El cliente no existe");
                 }
-                Microsoft.AspNetCore.Identity.SignInResult _resultadoLogin = await this._signInManagerService.PasswordSignInAsync(_clienteALoguear, credenciales.Password, false, false);
+                SignInResult _resultadoLogin = await this._signInManagerService.PasswordSignInAsync(_clienteALoguear, credenciales.Password, false, false);
                 if (!_resultadoLogin.Succeeded)
                 {
                     throw new Exception("Error al hacer login: " + _resultadoLogin.ToString());
@@ -176,6 +177,9 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 };
             }
         }
+
+        //Si quiero restringir el acceso a un metodo de un controlador a usuarios autenticados, debo decorar el metodo con el atributo [Authorize]
+
         #endregion
     }
 }
