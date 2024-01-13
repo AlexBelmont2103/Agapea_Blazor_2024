@@ -29,33 +29,37 @@
          };
      },
 
-     recuperarValor: function(clave) {
-         var request = window.indexedDB.open("MiBaseDeDatos", 1);
+     recuperarValor: function (clave) {
+         return new Promise((resolve, reject) => {
+             var request = window.indexedDB.open("MiBaseDeDatos", 1);
 
-         request.onerror = function(event) {
-             console.log("Error al abrir la base de datos");
-         };
-
-         request.onsuccess = function(event) {
-             var db = event.target.result;
-             var transaction = db.transaction(["MiAlmacen"], "readonly");
-             var objectStore = transaction.objectStore("MiAlmacen");
-             var request = objectStore.get(clave);
-
-             request.onerror = function(event) {
-                 console.log("Error al recuperar el valor");
+             request.onerror = function (event) {
+                 console.log("Error al abrir la base de datos");
+                 reject("Error al abrir la base de datos");
              };
 
-             request.onsuccess = function(event) {
-                 var valor = event.target.result;
-                 console.log("Valor recuperado correctamente:", valor);
-                 return valor;
-             };
-         };
+             request.onsuccess = function (event) {
+                 var db = event.target.result;
+                 var transaction = db.transaction(["MiAlmacen"], "readonly");
+                 var objectStore = transaction.objectStore("MiAlmacen");
+                 var request = objectStore.get(clave);
 
-         request.onupgradeneeded = function(event) {
-             var db = event.target.result;
-             var objectStore = db.createObjectStore("MiAlmacen");
-         };
+                 request.onerror = function (event) {
+                     console.log("Error al recuperar el valor");
+                     reject("Error al recuperar el valor");
+                 };
+
+                 request.onsuccess = function (event) {
+                     var valor = event.target.result;
+                     console.log("Valor recuperado correctamente:", valor);
+                     resolve(valor);
+                 };
+             };
+
+             request.onupgradeneeded = function (event) {
+                 var db = event.target.result;
+                 var objectStore = db.createObjectStore("MiAlmacen");
+             };
+         });
      }
  };
