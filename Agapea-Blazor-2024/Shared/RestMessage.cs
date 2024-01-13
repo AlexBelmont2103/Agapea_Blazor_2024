@@ -9,7 +9,7 @@
         public int Codigo { get; set; } = 0;
         public String Mensaje { get; set; } = "";
         public String Error { get; set; } = "";
-        public String TokenSesion { get; set; } = "";
+        public String Tokensesion { get; set; } = "";
         public Cliente? DatosCliente { get; set; } = null;
         public Object? OtrosDatos { get; set; } = null;
         #endregion

@@ -62,7 +62,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                         Codigo = 0,
                         Mensaje = "Se ha enviado un email al cliente",
                         Error = "",
-                        TokenSesion = null,
+                        Tokensesion = null,
                         DatosCliente = null,
                         OtrosDatos = null
 
@@ -70,16 +70,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 }
                 else
                 {
-                    return new RestMessage()
-                    {
-                        Codigo = 1,
-                        Mensaje = "Error al registrar el cliente: " + __resultRegistro.Errors.FirstOrDefault().Description,
-                        Error = __resultRegistro.Errors.Take(1).Select((IdentityError error) => error.Description).Single<String>(),
-                        TokenSesion = null,
-                        DatosCliente = null,
-                        OtrosDatos = null
-
-                    };
+                    throw new Exception("Error al registrar el cliente: " + __resultRegistro.Errors.FirstOrDefault().Description);
                 }
             }catch(Exception ex)
             {
@@ -88,7 +79,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                     Codigo = 1,
                     Mensaje = "Error al registrar el cliente: " + ex.Message,
                     Error = ex.Message,
-                    TokenSesion = null,
+                    Tokensesion = null,
                     DatosCliente = null,
                     OtrosDatos = null
 
@@ -145,7 +136,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                     Codigo = 0,
                     Mensaje = "Login correcto",
                     Error = "",
-                    TokenSesion = _tokenSesion,
+                    Tokensesion = _tokenSesion,
                     DatosCliente = new Cliente()
                     {
                         Nombre = _clienteALoguear.Nombre,
@@ -158,7 +149,8 @@ namespace Agapea_Blazor_2024.Server.Controllers
                             Login = _clienteALoguear.UserName,
                             Password = credenciales.Password,
                             Email = _clienteALoguear.Email,
-                            ImagenCuentaBASE64 = _clienteALoguear.ImagenAvatarBASE64
+                            ImagenCuentaBASE64 = _clienteALoguear.ImagenAvatarBASE64,
+                            CuentaActiva = _clienteALoguear.EmailConfirmed
                         }
                     },
                     OtrosDatos = null
@@ -171,7 +163,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                     Codigo = 1,
                     Mensaje = "Error al hacer login: " + ex.Message,
                     Error = ex.Message,
-                    TokenSesion = null,
+                    Tokensesion = null,
                     DatosCliente = null,
                     OtrosDatos = null
                 };

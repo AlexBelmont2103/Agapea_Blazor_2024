@@ -72,6 +72,7 @@
     #region ... propiedades componente login
     public Cuenta CuentaLogin = new Cuenta();
     public String MensajeError { get; set; } = "";
+    
     #endregion
     #region ... metodos componente login
     public async Task LoginCliente()
@@ -84,7 +85,7 @@
         {
             //Guardar en el localstorage el token de la cuenta
             //O en un servicio utilizando observables
-            await this.storageService.AlmacenamientoJWTAsync(_resp.TokenSesion);
+            await this.storageService.AlmacenamientoJWTAsync(_resp.Tokensesion);
             await this.storageService.AlmacenamientoDatosClienteAsync(_resp.DatosCliente);
             navManager.NavigateTo("/");
         }
@@ -92,7 +93,6 @@
         {
             //Mostrar mensaje en la vista del componente...
             this.MensajeError = _resp.Mensaje + "..." + _resp.Error;
-
         }
         
     }
