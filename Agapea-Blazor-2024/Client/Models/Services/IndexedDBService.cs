@@ -8,10 +8,12 @@ namespace Agapea_Blazor_2024.Client.Models.Services
     {
         #region propiedades de la clase IndexedDBService
         private IJSRuntime _jsRuntime;
+        private DotNetObjectReference<IndexedDBService> _refIndexedService;
         #endregion
         public IndexedDBService(IJSRuntime jsServiceDI)
         {
             this._jsRuntime = jsServiceDI;
+            this._refIndexedService = DotNetObjectReference.Create(this);
         }
         #region metodos de la clase IndexedDBService
 
@@ -37,15 +39,30 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         #region metodos ASINCRONOS
         public async Task AlmacenamientoDatosClienteAsync(Cliente datoscliente)
         {
-            await this._jsRuntime.InvokeVoidAsync("adminIndexedDB.almacenarValor", "datoscliente", datoscliente);
+            await this._jsRuntime.InvokeVoidAsync("adminIndexedDB.almacenarDatosCliente", datoscliente);
         }
         public async Task AlmacenamientoJWTAsync(string tokenJWT)
         {
-            await this._jsRuntime.InvokeVoidAsync("adminIndexedDB.almacenarValor", "tokensesion", tokenJWT);
+            await this._jsRuntime.InvokeVoidAsync("adminIndexedDB.almacenarTokenCliente", tokenJWT);
         }
         public async Task<Cliente> RecuperarDatosClienteAsync()
         {
-            return await this._jsRuntime.InvokeAsync<Cliente>("adminIndexedDB.recuperarValor", "datoscliente");
+            //A la funcion de js le paso la ref del servicio para que
+            //cuando acabe su ejecucion, llame a un metodo de este servicio
+            return await this._jsRuntime.InvokeAsync<Cliente>("adminIndexedDB.recuperarDatosCliente", this._refIndexedService);
+        }
+
+        //Metodo invocable desde js (ManageIndexedDB.js)
+        [JSInvokable("CallbackServicioIndexedDBblazor")]
+        public void CallFromJS(Cliente clienteIndexedDB)
+        {
+
+        }
+        //Sobrecarga del metodo invocable desde js (ManageIndexedDB.js)
+        [JSInvokable("CallbackServicioIndexedDBblazor")]
+        public void CallFromJS(string token)
+        {
+
         }
         public async Task<string> RecuperarJWTAsync()
         {
