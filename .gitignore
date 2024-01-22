@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Agapea-Blazor-2024/Server/appsettings.json
+/Agapea-Blazor-2024/Server/appsettings.json
