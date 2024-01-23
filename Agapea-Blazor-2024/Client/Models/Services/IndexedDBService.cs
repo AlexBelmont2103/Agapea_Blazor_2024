@@ -9,6 +9,9 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         #region propiedades de la clase IndexedDBService
         private IJSRuntime _jsRuntime;
         private DotNetObjectReference<IndexedDBService> _refIndexedService;
+        //Propiedad de tipo evento que vamos a usar para notificar a aquellos componentes que usen este servicio
+        //que se han recuperado datos de IndexedDB (en este caso, el cliente) y ya están disponibles
+        public event EventHandler<Cliente> ClienteRecupIndexedDBEvent;
         #endregion
         public IndexedDBService(IJSRuntime jsServiceDI)
         {
@@ -56,13 +59,9 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         [JSInvokable("CallbackServicioIndexedDBblazor")]
         public void CallFromJS(Cliente clienteIndexedDB)
         {
-
-        }
-        //Sobrecarga del metodo invocable desde js (ManageIndexedDB.js)
-        [JSInvokable("CallbackServicioIndexedDBblazor")]
-        public void CallFromJS(string token)
-        {
-
+            //Cuando recibo los datos del cliente, notifico a los componentes que usen este servicio
+            //que ya están disponibles los datos del cliente
+            this.ClienteRecupIndexedDBEvent.Invoke(this, clienteIndexedDB);
         }
         public async Task<string> RecuperarJWTAsync()
         {

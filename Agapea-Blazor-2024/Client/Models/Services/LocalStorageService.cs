@@ -8,6 +8,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
     {
         #region propiedades del servicio
         private IJSRuntime _jsRuntime;
+        public event EventHandler<Cliente> ClienteRecupIndexedDBEvent;
         #endregion
         public LocalStorageService(IJSRuntime jsServiceDI)
         {

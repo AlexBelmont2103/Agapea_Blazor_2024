@@ -1,5 +1,21 @@
-﻿@inherits LayoutComponentBase
+﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inherits LayoutComponentBase
+
+@inject IStorageService storageService
 
 <main>
     @Body
 </main>
+
+@code{
+    public Cliente clienteLogged { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        this.storageService.ClienteRecupIndexedDBEvent += RecuperarDatos;
+        await this.storageService.RecuperarDatosClienteAsync();
+    }
+    private void RecuperarDatos(object sender, Cliente datoscliente)
+    {
+        this.clienteLogged = datoscliente;
+    }
+}

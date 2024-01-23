@@ -7,7 +7,7 @@
 
 function _crearEsquemaIndexedDB() {
     //Crear esquema de la base de datos
-    var request = window.indexedDB.open("AgapeaDB", 1);
+    var request = indexedDB.open("AgapeaDB", 1);
     request.onupgradeneeded = function (event) {
         var db = event.target.result;
         var clientesObjectStore = db.createObjectStore("datosclientes", { keyPath: "email" }); //Objeto IDBObjectStore
