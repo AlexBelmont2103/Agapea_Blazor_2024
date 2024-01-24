@@ -1,10 +1,8 @@
 using Agapea_Blazor_2024.Server.Models;
 using Agapea_Blazor_2024.Server.Models.Services;
 using agapea_netcore_mvc_23_24.Models.Servicios;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
@@ -22,14 +20,14 @@ var builder = WebApplication.CreateBuilder(args);
 String _cadenaConexionBD = builder.Configuration.GetConnectionString("BlazorSqlServerConnectionString");
 String _nombreEnsablado = Assembly.GetExecutingAssembly().GetName().Name;
 //1º: Configurar cadena de conexion que va a usar el DbContext para volcar cambios  en migraciones y recuperar datos
-builder.Services.AddDbContext<AplicacionDBContext>((DbContextOptionsBuilder opciones) => 
+builder.Services.AddDbContext<AplicacionDBContext>((DbContextOptionsBuilder opciones) =>
 {
-    opciones.UseSqlServer(_cadenaConexionBD, (SqlServerDbContextOptionsBuilder opc)=> opc.MigrationsAssembly(_nombreEnsablado));
-} );
+    opciones.UseSqlServer(_cadenaConexionBD, (SqlServerDbContextOptionsBuilder opc) => opc.MigrationsAssembly(_nombreEnsablado));
+});
 
 //2º: Configurar servicio de Identity: UserManager y SignInManager
 builder.Services.AddIdentity<MiClienteIdentity, IdentityRole>(
-    (IdentityOptions opciones) => 
+    (IdentityOptions opciones) =>
     {
         //Opciones de configuracion UserManager
         opciones.Password = new PasswordOptions()
@@ -82,7 +80,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // <
 
 //Inyeccion  servicio de envio de emails
 builder.Services.AddScoped<IClienteCorreo, MailjetService>();
-    
+
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -105,6 +103,12 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+//--------------------- meto en la pipeline los middleware para la autentificacion y autorizacion usando identity --------------
+app.UseAuthentication();
+app.UseAuthorization();
+//------------------------------------------------------------------------------------------------------------------------------
+
 
 app.MapRazorPages();
 app.MapControllers();

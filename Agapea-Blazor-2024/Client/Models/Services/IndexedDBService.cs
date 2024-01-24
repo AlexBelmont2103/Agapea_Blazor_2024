@@ -56,16 +56,21 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         }
 
         //Metodo invocable desde js (ManageIndexedDB.js)
-        [JSInvokable("CallbackServicioIndexedDBblazor")]
+        [JSInvokable("CallbackServIndexedDBblazor")]
         public void CallFromJS(Cliente clienteIndexedDB)
         {
             //Cuando recibo los datos del cliente, notifico a los componentes que usen este servicio
             //que ya están disponibles los datos del cliente
             this.ClienteRecupIndexedDBEvent.Invoke(this, clienteIndexedDB);
         }
+        [JSInvokable("CallbackServIndexedDBblazorJWT")]
+        public void CallFromJS2(String jwt)
+        {
+
+        }
         public async Task<string> RecuperarJWTAsync()
         {
-            return await this._jsRuntime.InvokeAsync<string>("adminIndexedDB.recuperarValor", "tokensesion");
+            return await this._jsRuntime.InvokeAsync<string>("adminIndexedDB.recuperarTokenCliente", this._refIndexedService);
         }
         #endregion
 
