@@ -85,8 +85,8 @@
         {
             //Guardar en el localstorage el token de la cuenta
             //O en un servicio utilizando observables
-            await this.storageService.AlmacenamientoDatosClienteAsync((Cliente)_resp.DatosCliente);
-            await this.storageService.AlmacenamientoJWTAsync(_resp.Tokensesion);
+             this.storageService.AlmacenamientoDatosCliente((Cliente)_resp.DatosCliente);
+             this.storageService.AlmacenamientoJWT(_resp.Tokensesion);
             
             navManager.NavigateTo("/Tienda/Libros");
         }

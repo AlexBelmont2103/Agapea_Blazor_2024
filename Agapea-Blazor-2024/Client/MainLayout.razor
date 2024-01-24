@@ -3,6 +3,7 @@
 
 @inject IStorageService storageService
 @inject NavigationManager navigate
+@inject IRestService restSvc
 
 <header>
     <div class="container-lg m-0 p-0">
@@ -75,21 +76,36 @@
 </header>
 
 <div class="container">
+
     <div class="row">
-        @Body
+        <div class="col-3">
+            <h1>Categorias</h1>
+            @foreach (var item in this.listaCats)
+            {
+                <a class="btn btn-primary btn-sm" onclick="@(()=>this.navigate.NavigateTo("/Tienda/Libros/" + item.IdCategoria))">@item.NombreCategoria</a>
+            }
+        </div>
+        <div class="col-9">
+            @Body
+        </div>
+        
     </div>
 </div>
 
 @code{
     public Cliente clienteLogged { get; set; }
+    public List<Categoria> listaCats = new List<Categoria>();
+    
     protected override async Task OnInitializedAsync()
     {
         this.storageService.ClienteRecupIndexedDBEvent += RecuperarDatos;
-        await this.storageService.RecuperarDatosClienteAsync();
+        this.storageService.RecuperarDatosCliente();
+        this.listaCats = await this.restSvc.RecuperarCategorias("");
     }
     private void RecuperarDatos(object sender, Cliente datoscliente)
     {
         this.clienteLogged = datoscliente;
+        this.StateHasChanged();
     }
     public void Dispose()
     {

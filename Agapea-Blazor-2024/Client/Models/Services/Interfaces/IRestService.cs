@@ -12,7 +12,9 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         #endregion
 
         #region metodos/props para zonaTienda
-
+        Task<List<Libro>> RecuperarLibros(String idcat);
+        Task<Libro> RecuperarLibro(String isbn13);
+        Task<List<Categoria>> RecuperarCategorias(String idcat);
         #endregion
     }
 }

@@ -21,10 +21,10 @@ namespace Agapea_Blazor_2024.Server.Models
         #region ... propiedades de la clase AplicacionDBContext ...
         //Definimos un DbSet por cada clase modelo a mapear en el DbContext como propiedad ...
         public DbSet<Direccion> Direcciones { get; set; }
-        //public DbSet<Libro> Libros { get; set; }
+        public DbSet<Libro> Libros { get; set; }
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<ItemPedido> ItemsPedido { get; set; }
-        //public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Categoria> Categorias { get; set; }
 
 
         #endregion

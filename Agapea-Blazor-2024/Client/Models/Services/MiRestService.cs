@@ -21,6 +21,21 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             return _bodyResp;
         }
 
+        public async Task<List<Categoria>> RecuperarCategorias(string idcat)
+        {
+            return await this._httpClient.GetFromJsonAsync<List<Categoria>>($"api/RESTTienda/RecuperarCategorias?idcat={idcat}") ?? new List<Categoria>();
+        }
+
+        public Task<Libro> RecuperarLibro(string isbn13)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<Libro>> RecuperarLibros(string idcat)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<RestMessage> RegistrarCliente(Cliente NuevoCliente)
         {
             HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Cliente>("api/RESTCliente/Registro", NuevoCliente);

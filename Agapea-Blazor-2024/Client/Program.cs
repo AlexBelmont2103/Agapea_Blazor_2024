@@ -15,6 +15,6 @@ builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().Cre
 
 //Definicion de inyeccion de dependencias para los servicios de la aplicacion
 builder.Services.AddScoped<IRestService, MiRestService>();
-builder.Services.AddScoped<IStorageService, IndexedDBService>();
+builder.Services.AddScoped<IStorageService, SubjectStorage>();
 
 await builder.Build().RunAsync();
