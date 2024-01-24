@@ -80,22 +80,9 @@ namespace Agapea_Blazor_2024.Server.Models
 
             #endregion
             #region /// CREACION DE TABLA LIBROS A PARTIR DE LA CLASE MODELO LIBRO ///
-            /*
             builder.Entity<Libro>().ToTable("Libros");
-            builder.Entity<Libro>().HasKey((Libro lib) => lib.ISBN13);
-            builder.Entity<Libro>().Property((Libro lib) => lib.IdCategoria).IsRequired().HasMaxLength(250);
-            builder.Entity<Libro>().Property((Libro lib) => lib.Titulo).IsRequired().HasMaxLength(250);
-            builder.Entity<Libro>().Property((Libro lib) => lib.Editorial).IsRequired().HasMaxLength(250);
-            builder.Entity<Libro>().Property((Libro lib) => lib.Autores).IsRequired().HasMaxLength(250);
-            builder.Entity<Libro>().Property((Libro lib) => lib.ImagenLibroBASE64).IsRequired();
-            builder.Entity<Libro>().Property((Libro lib) => lib.Edicion).IsRequired().HasMaxLength(250);
-            builder.Entity<Libro>().Property((Libro lib) => lib.Dimensiones).IsRequired().HasMaxLength(250);
-            builder.Entity<Libro>().Property((Libro lib) => lib.Idioma).IsRequired().HasMaxLength(50);
-            builder.Entity<Libro>().Property((Libro lib) => lib.ISBN10).IsRequired().HasMaxLength(10);
-            builder.Entity<Libro>().Property((Libro lib) => lib.Resumen).IsRequired();
-            builder.Entity<Libro>().Property((Libro lib) => lib.NumeroPaginas).IsRequired();
-            builder.Entity<Libro>().Property((Libro lib) => lib.Precio).IsRequired();
-            */
+            builder.Entity<Libro>().HasKey("ISBN13");
+            builder.Entity<Libro>().Property((Libro lib) => lib.Precio).HasColumnType("DECIMAL(5,2)");
             #endregion
             #region /// CREACION DE TABLA ITEMMSPEDIDO A PARTIR DE LA CLASE MODELO ITEMPEDIDO 
             builder.Entity<ItemPedido>().ToTable("ItemsPedido");
@@ -137,9 +124,8 @@ namespace Agapea_Blazor_2024.Server.Models
             builder.Entity<Pedido>().Property((Pedido ped) => ped.EstadoPedido).IsRequired().HasMaxLength(50);
             #endregion
             #region /// CREACION DE TABLA CATEGORIAS A PARTIR DE LA CLASE MODELO CATEGORIA
-            //Esta tabla ya existe en la BD, pero la creamos a traves de EF para poder usarla en el contexto de la aplicacion
-            
-
+            //builder.Entity<Categoria>().ToTable("Categorias");
+            builder.Entity<Categoria>().HasNoKey();
             #endregion
         }
         #endregion

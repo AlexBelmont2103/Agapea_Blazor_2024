@@ -79,11 +79,12 @@
 
     <div class="row">
         <div class="col-3">
-            <h1>Categorias</h1>
-            @foreach (var item in this.listaCats)
-            {
-                <a class="btn btn-primary btn-sm" onclick="@(()=>this.navigate.NavigateTo("/Tienda/Libros/" + item.IdCategoria))">@item.NombreCategoria</a>
-            }
+            <div class="list-group">
+                @foreach (var item in this.listaCats)
+                {
+                    <a class="list-group-item list-group-item-action" onclick="@(()=>this.navigate.NavigateTo("/Tienda/Libros/" + item.IdCategoria))">@item.NombreCategoria</a>
+                }
+            </div
         </div>
         <div class="col-9">
             @Body
