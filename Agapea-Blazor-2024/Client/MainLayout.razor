@@ -1,4 +1,5 @@
 ﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@using Agapea_Blazor_2024.Client.Pages.zonaTienda
 @inherits LayoutComponentBase
 
 @inject IStorageService storageService
@@ -78,15 +79,10 @@
 <div class="container">
 
     <div class="row">
-        <div class="col-3">
-            <div class="list-group">
-                @foreach (var item in this.listaCats)
-                {
-                    <a class="list-group-item list-group-item-action" onclick="@(()=>this.navigate.NavigateTo("/Tienda/Libros/" + item.IdCategoria))">@item.NombreCategoria</a>
-                }
-            </div
+        <div class="col-3 border border-bottom-0 border-top-0 border-start-0 border-end-1 border-dark">
+            <PanelCategoriasLibros/>
         </div>
-        <div class="col-9">
+        <div class="col-9 mt-4">
             @Body
         </div>
         

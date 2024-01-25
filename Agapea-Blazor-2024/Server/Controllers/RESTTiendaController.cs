@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 namespace Agapea_Blazor_2024.Server.Controllers
 {
     [Route("api/[controller]/[action]")]
+    [ApiController]
     public class RESTTiendaController : ControllerBase
     {
         #region propiedades de la clase RESTTiendaController
@@ -25,8 +26,9 @@ namespace Agapea_Blazor_2024.Server.Controllers
             {
                 if (String.IsNullOrEmpty(idcat)) idcat = "2-10";
                 return this._dbContext.Libros.Where((Libro unLibro) => unLibro.IdCategoria.StartsWith(idcat)).ToList<Libro>();
-                    
-            }catch(Exception ex)
+
+            }
+            catch (Exception ex)
             {
                 return null;
             }
@@ -37,36 +39,65 @@ namespace Agapea_Blazor_2024.Server.Controllers
         {
             try
             {
-                return this._dbContext.Libros.Where((Libro unLibro) => unLibro.ISBN13 == isbn13).Single<Libro>();
+                return this._dbContext
+                            .Libros
+                            .Where(
+                                    (Libro unlibro) => unlibro.ISBN13 == isbn13
+                                    )
+                            .Single<Libro>();
             }
             catch (Exception ex)
             {
-                return null;
+
+                return new Libro();
             }
         }
 
         [HttpGet]
-        public List<Categoria> RecuperarCategorias([FromQuery]String idcat)
+        public List<Categoria> RecuperarCategorias([FromQuery] String idcat)
         {
-
             try
             {
-                //Si idcat está vacío, devolver las categorias padre con un regex
-                //Si idcat no está vacío, devolver las categorias hijas de la categoria indicada en idcat
-                //Convertir el regex según el formato de idcat
-                Regex _regex = new Regex(@"^" + idcat + @"-\d+$");
-                if (String.IsNullOrEmpty(idcat)) _regex= new Regex(@"^[0-9]{1,}$");
-                //Si usas patrones directamente en la consulta LINQ, EF no puede convertirlo a SQL
-                //Dos soluciones:
-                //Usar el operador LIKE de SQLServer se mapea contra el operador Contains de LINQ
-                //Coger todos los datos de la tabla y filtrarlos en memoria con LINQ
-                // Para hacer esto usas el metodo .AsEnumerable() tras el nombre del DbSet
-                //return this._dbContext.Categorias.Where((Categoria unaCategoria) => _regex.IsMatch(unaCategoria.IdCategoria)).ToList<Categoria>();
-                return this._dbContext.Categorias.AsEnumerable<Categoria>().Where((Categoria unaCategoria) => _regex.IsMatch(unaCategoria.IdCategoria)).ToList<Categoria>();
+                //si en idcat esta vacio, quiero recuperar categorias "raiz" IdCategoria="un digito"
+                //si no, quiero recuperar subcategorias de una categoria q pasan:  IdCategoria=idcat-"digito"
+                Regex _patronBusqueda;
+                if (String.IsNullOrEmpty(idcat) || idcat == "raices")
+                {
+                    _patronBusqueda = new Regex("^[0-9]{1,}$"); //<<---- "^\d+$"
+                }
+                else
+                {
+                    _patronBusqueda = new Regex("^" + idcat + "-[0-9]{1,}$");
+                }
+                //si usas patrones directamente en la consulta LINQ al intentar traducir esta consulta a lenguaje SQL
+                //en SqlServer, como no hay operadores de tipo expresion Regular no puede convertirlo y zzzzzzzzasssss
+                //excepcion....¿solucion?
+
+                //return this._dbContext
+                //            .Categorias
+                //            .Where(
+                //                    (Categoria unacat) => _patronBusqueda.IsMatch(unacat.IdCategoria)
+                //                )
+                //            .ToList<Categoria>();
+
+
+
+                //dos opciones:
+                // - el operador LIKE si existe en sqlserver <---- se mapea contra metodo .Contains() de LINQ
+                // - te descargas tooooooooooooda la tabla en memoria y luego lo filtras con op.linq
+                //    para hacer esto usas el metodo .AsEnumerable() tras el nombre del DbSet
+                return this._dbContext
+                            .Categorias
+                            .AsEnumerable<Categoria>() //<--- SELECT * FROM dbo.Categorias y por cada fila construye objeto Categoria
+                            .Where(
+                                    (Categoria unacat) => _patronBusqueda.IsMatch(unacat.IdCategoria)
+                                )
+                            .ToList<Categoria>();
+
             }
             catch (Exception ex)
             {
-                return null;
+                return new List<Categoria>();
             }
         }
         #endregion
