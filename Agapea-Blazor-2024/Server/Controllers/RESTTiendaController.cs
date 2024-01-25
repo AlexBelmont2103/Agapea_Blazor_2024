@@ -1,5 +1,4 @@
-﻿
-using Agapea_Blazor_2024.Server.Models;
+﻿using Agapea_Blazor_2024.Server.Models;
 using Agapea_Blazor_2024.Shared;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
