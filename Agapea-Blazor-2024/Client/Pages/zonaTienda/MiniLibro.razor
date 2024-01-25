@@ -2,7 +2,9 @@
     como no tiene @page .... no va a ser invocable por el modulo de enrutamiento
     recibe como parametro desde el comp.padre Libros.razor el valor del libro a pintar
 *@
+@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
 @inject NavigationManager navigate
+@inject IStorageService storageSvc
 
 <div class="mb-3" style="max-width: 540px;" id="cardLibro-@libroAPintar.ISBN13"
      onmouseover="@(() => { this.estiloBotonComprar="visibility:visible"; } )"
@@ -17,11 +19,11 @@
                 </a>
             </div>
             <div class="m-3">
-                <a onclick="@( ()=>{ this.navigate.NavigateTo($"/Pedido/AddLibroPedido/{libroAPintar.ISBN13}"); })"
+                <button onclick="@(AddLibroPedido())"
                    class="btn btn-primary btn-sm"
                    style="@this.estiloBotonComprar">
                     Comprar...
-                </a>
+                </button>
             </div>
         </div>
 
@@ -44,5 +46,11 @@
 
     [Parameter]
     public Libro libroAPintar { get; set; }
+
+    private void AddLibroPedido()
+    {
+        this.storageSvc.OperarElementosPedido(libroAPintar, 1, "agregar");
+        this.navigate.NavigateTo("/Tienda/MostrarPedido");
+    }
 
 }

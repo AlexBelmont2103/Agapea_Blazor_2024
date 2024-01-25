@@ -24,6 +24,10 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         {
             throw new NotImplementedException();
         }
+        public Task OperarElementosPedidoAsync(Libro libro, int cantidad, string operacion)
+        {
+            throw new NotImplementedException();
+        }
         public Cliente RecuperarDatosCliente()
         {
             throw new NotImplementedException();
@@ -32,25 +36,37 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         {
             throw new NotImplementedException();
         }
+        public List<ItemPedido> RecuperarElementosPedido()
+        {
+            throw new NotImplementedException();
+        }
         #endregion
         #region metodos ASINCRONOS
         public async Task AlmacenamientoDatosClienteAsync(Cliente datoscliente)
         {
             //Tendria que ejecutar esto desde Javascript: localStorage.setItem("Cliente", JSON.stringuify(datoscliente));
-             await this._jsRuntime.InvokeVoidAsync("adminLocalStorage.almacenarValor", "datoscliente", datoscliente);
+            await this._jsRuntime.InvokeVoidAsync("adminLocalStorage.almacenarValor", "datoscliente", datoscliente);
         }
         public async Task AlmacenamientoJWTAsync(string tokenJWT)
         {
             //Tendria que ejecutar esto desde Javascript: localStorage.setItem("JWT", tokenJWT);
-             await this._jsRuntime.InvokeVoidAsync("adminLocalStorage.almacenarValor", "tokensesion", tokenJWT);
+            await this._jsRuntime.InvokeVoidAsync("adminLocalStorage.almacenarValor", "tokensesion", tokenJWT);
         }
         public async Task<Cliente> RecuperarDatosClienteAsync()
         {
-           return await this._jsRuntime.InvokeAsync<Cliente>("adminLocalStorage.recuperarValor", "datoscliente");
+            return await this._jsRuntime.InvokeAsync<Cliente>("adminLocalStorage.recuperarValor", "datoscliente");
         }
         public async Task<string> RecuperarJWTAsync()
         {
             return await this._jsRuntime.InvokeAsync<string>("adminLocalStorage.recuperarValor", "tokensesion");
+        }
+        public void OperarElementosPedido(Libro libro, int cantidad, string operacion)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<List<ItemPedido>> RecuperarElementosPedidoAsync()
+        {
+            throw new NotImplementedException();
         }
         #endregion
         #endregion

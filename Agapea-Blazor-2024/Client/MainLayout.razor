@@ -77,22 +77,32 @@
 </header>
 
 <div class="container">
+    @if (!this.navigate.Uri.Contains("Tienda/MostrarPedido") && !this.navigate.Uri.Contains("Registro") && !this.navigate.Uri.Contains("Login"))
+    {
+        <div class="row">
+            <div class="col-3 border border-bottom-0 border-top-0 border-start-0 border-end-1 border-dark">
+                <PanelCategoriasLibros />
+            </div>
+            <div class="col-9 mt-4">
+                @Body
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12 mt-4">
+                @Body
+            </div>
+        </div>
+    }
 
-    <div class="row">
-        <div class="col-3 border border-bottom-0 border-top-0 border-start-0 border-end-1 border-dark">
-            <PanelCategoriasLibros/>
-        </div>
-        <div class="col-9 mt-4">
-            @Body
-        </div>
-        
-    </div>
 </div>
 
-@code{
+@code {
     public Cliente clienteLogged { get; set; }
     public List<Categoria> listaCats = new List<Categoria>();
-    
+
     protected override async Task OnInitializedAsync()
     {
         this.storageService.ClienteRecupIndexedDBEvent += RecuperarDatos;

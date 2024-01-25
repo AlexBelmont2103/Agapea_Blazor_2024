@@ -29,11 +29,19 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         {
             throw new NotImplementedException();
         }
+        public void OperarElementosPedido(Libro libro, int cantidad, string operacion)
+        {
+            throw new NotImplementedException();
+        }
         public Cliente RecuperarDatosCliente()
         {
             throw new NotImplementedException();
         }
         public string RecuperarJWT()
+        {
+            throw new NotImplementedException();
+        }
+        public Task OperarElementosPedidoAsync(Libro libro, int cantidad, string operacion)
         {
             throw new NotImplementedException();
         }
@@ -71,6 +79,15 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         public async Task<string> RecuperarJWTAsync()
         {
             return await this._jsRuntime.InvokeAsync<string>("adminIndexedDB.recuperarTokenCliente", this._refIndexedService);
+        }
+
+        public List<ItemPedido> RecuperarElementosPedido()
+        {
+            throw new NotImplementedException();
+        }
+        public Task<List<ItemPedido>> RecuperarElementosPedidoAsync()
+        {
+            throw new NotImplementedException();
         }
         #endregion
 

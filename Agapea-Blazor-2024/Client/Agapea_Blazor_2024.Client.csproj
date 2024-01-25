@@ -18,8 +18,4 @@
     <ProjectReference Include="..\Shared\Agapea_Blazor_2024.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\zonaPedido\" />
-  </ItemGroup>
-
 </Project>
