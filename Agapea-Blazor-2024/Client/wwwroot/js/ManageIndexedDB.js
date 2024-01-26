@@ -110,6 +110,7 @@ window.adminIndexedDB = {
                 _reqSelectDatosCliente.addEventListener('success', (evt) => {
                     var _datosCliente = evt.target.result;
                     //paso datos del cliente recuperados desde indexedDB al servicio blazor usando la ref.
+                    console.log('datos cliente recuperados de indexedDB...', _datosCliente);
                     refServicioNET.invokeMethodAsync('CallbackServIndexedDBblazor', _datosCliente);
 
                 });

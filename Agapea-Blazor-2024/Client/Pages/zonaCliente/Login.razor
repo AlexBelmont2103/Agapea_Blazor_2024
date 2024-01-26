@@ -72,7 +72,7 @@
     #region ... propiedades componente login
     public Cuenta CuentaLogin = new Cuenta();
     public String MensajeError { get; set; } = "";
-    
+
     #endregion
     #region ... metodos componente login
     public async Task LoginCliente()
@@ -84,11 +84,17 @@
         if (_resp.Codigo == 0)
         {
             //Guardar en el localstorage el token de la cuenta
+            //this.storageService.AlmacenamientoDatosClienteAsync((Cliente)_resp.DatosCliente);
+            //this.storageService.AlmacenamientoJWTAsync(_resp.Tokensesion);
+            
             //O en un servicio utilizando observables
              this.storageService.AlmacenamientoDatosCliente((Cliente)_resp.DatosCliente);
              this.storageService.AlmacenamientoJWT(_resp.Tokensesion);
             
-            navManager.NavigateTo("/Tienda/Libros");
+
+
+            this.navManager.NavigateTo("/Tienda/Libros");
+
         }
         else
         {

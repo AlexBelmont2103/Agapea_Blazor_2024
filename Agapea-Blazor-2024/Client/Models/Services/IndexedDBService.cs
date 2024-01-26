@@ -51,6 +51,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         public async Task AlmacenamientoDatosClienteAsync(Cliente datoscliente)
         {
             await this._jsRuntime.InvokeVoidAsync("adminIndexedDB.almacenarDatosCliente", datoscliente);
+            this.ClienteRecupIndexedDBEvent?.Invoke(this, datoscliente);
         }
         public async Task AlmacenamientoJWTAsync(string tokenJWT)
         {
@@ -69,15 +70,12 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         {
             //Cuando recibo los datos del cliente, notifico a los componentes que usen este servicio
             //que ya están disponibles los datos del cliente
-            this.ClienteRecupIndexedDBEvent.Invoke(this, clienteIndexedDB);
-        }
-        [JSInvokable("CallbackServIndexedDBblazorJWT")]
-        public void CallFromJS2(String jwt)
-        {
+            this.ClienteRecupIndexedDBEvent?.Invoke(this, clienteIndexedDB);
 
         }
         public async Task<string> RecuperarJWTAsync()
         {
+            await this._jsRuntime.InvokeVoidAsync("console.log", "Recuperando token cliente");
             return await this._jsRuntime.InvokeAsync<string>("adminIndexedDB.recuperarTokenCliente", this._refIndexedService);
         }
 

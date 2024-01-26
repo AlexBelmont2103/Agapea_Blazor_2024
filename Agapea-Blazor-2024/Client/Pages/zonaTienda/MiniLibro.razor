@@ -19,7 +19,7 @@
                 </a>
             </div>
             <div class="m-3">
-                <button onclick="@(AddLibroPedido())"
+                <button 
                    class="btn btn-primary btn-sm"
                    style="@this.estiloBotonComprar">
                     Comprar...
@@ -49,7 +49,7 @@
 
     private void AddLibroPedido()
     {
-        this.storageSvc.OperarElementosPedido(libroAPintar, 1, "agregar");
+        //this.storageSvc.OperarElementosPedido(libroAPintar, 1, "agregar");
         this.navigate.NavigateTo("/Tienda/MostrarPedido");
     }
 

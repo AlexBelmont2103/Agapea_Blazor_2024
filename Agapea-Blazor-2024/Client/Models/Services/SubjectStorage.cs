@@ -29,8 +29,8 @@ namespace Agapea_Blazor_2024.Client.Models.Services
          */
         #region propiedades del servicio
         public event EventHandler<Cliente> ClienteRecupIndexedDBEvent;
-        private BehaviorSubject<Cliente> _clienteSubject= new BehaviorSubject<Cliente>(null);
-        private BehaviorSubject<String> _jwtSubject= new BehaviorSubject<string>("");
+        private BehaviorSubject<Cliente> _clienteSubject = new BehaviorSubject<Cliente>(null);
+        private BehaviorSubject<String> _jwtSubject = new BehaviorSubject<string>("");
         private BehaviorSubject<List<ItemPedido>> _itemsPedidoSubject = new BehaviorSubject<List<ItemPedido>>(null);
         private Cliente _datoscliente = new Cliente(); //Variable privada para almacenar los datos del subject Cliente
         private String _datosJWT = ""; //Variable privada para almacenar datos del subject String
@@ -47,11 +47,11 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         public void AlmacenamientoDatosCliente(Cliente datoscliente)
         {
             this._clienteSubject.OnNext(datoscliente); //Actualizo los datos del subject
-            this.ClienteRecupIndexedDBEvent.Invoke(this,datoscliente); //Disparo el evento por si alguien lo esta escuchando
+            this.ClienteRecupIndexedDBEvent.Invoke(this, datoscliente); //Disparo el evento por si alguien lo esta escuchando
         }
         public void AlmacenamientoJWT(string tokenJWT)
         {
-            this._jwtSubject.OnNext(tokenJWT);
+            this._jwtSubject.OnNext(tokenJWT); //Actualizo los datos del subject
         }
         public void OperarElementosPedido(Libro libro, int cantidad, string operacion)
         {
@@ -61,15 +61,15 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             //Si vale eliminar, elimino el elemento del pedido
             //Una vez realizada la operacion, actualizo los datos del subject
 
-            if(operacion == "agregar")
+            if (operacion == "agregar")
             {
                 this.AgregarItemPedido(libro, cantidad);
             }
-            else if(operacion == "quitar")
+            else if (operacion == "quitar")
             {
                 this.RestarItemPedido(libro, cantidad);
             }
-            else if(operacion == "eliminar")
+            else if (operacion == "eliminar")
             {
                 this.EliminarItemPedido(libro);
             }

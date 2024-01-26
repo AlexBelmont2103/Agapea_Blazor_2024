@@ -5,6 +5,7 @@
 @inject IStorageService storageService
 @inject NavigationManager navigate
 @inject IRestService restSvc
+@inject IJSRuntime jsService
 
 <header>
     <div class="container-lg m-0 p-0">
@@ -101,13 +102,19 @@
 
 @code {
     public Cliente clienteLogged { get; set; }
-    public List<Categoria> listaCats = new List<Categoria>();
+   
 
     protected override async Task OnInitializedAsync()
     {
-        this.storageService.ClienteRecupIndexedDBEvent += RecuperarDatos;
+        //Recuperar datos del cliente logueado
+        
+        //Version sincrona (observables)
         this.storageService.RecuperarDatosCliente();
-        this.listaCats = await this.restSvc.RecuperarCategorias("");
+        //Version asincrona (IndexedDB)
+        //this.storageService.RecuperarDatosClienteAsync();
+        this.storageService.ClienteRecupIndexedDBEvent += RecuperarDatos;
+        //Mostrar en consola los datos del cliente
+        
     }
     private void RecuperarDatos(object sender, Cliente datoscliente)
     {
