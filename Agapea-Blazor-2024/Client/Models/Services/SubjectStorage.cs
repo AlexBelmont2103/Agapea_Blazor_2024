@@ -34,13 +34,24 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         private BehaviorSubject<List<ItemPedido>> _itemsPedidoSubject = new BehaviorSubject<List<ItemPedido>>(null);
         private Cliente _datoscliente = new Cliente(); //Variable privada para almacenar los datos del subject Cliente
         private String _datosJWT = ""; //Variable privada para almacenar datos del subject String
-        private List<ItemPedido> _datosItemsPedido = new List<ItemPedido>();
+        private List<ItemPedido> _datosItemsPedido = new();
         #endregion
         public SubjectStorage()
         {
-            IDisposable _subscriptionItemsPedidoSubject = this._itemsPedidoSubject.Subscribe<List<ItemPedido>>((List<ItemPedido> datosItemsPedido) => this._datosItemsPedido = datosItemsPedido);
-            IDisposable _subscriptionClienteSubject = this._clienteSubject.Subscribe<Cliente>((Cliente datosObs) => this._datoscliente = datosObs);
-            IDisposable _subscriptionJWTSubject = this._jwtSubject.Subscribe<String>((String datosJWT) => this._datosJWT = datosJWT);
+            IDisposable _subscripItemsPedidoSubject = this._itemsPedidoSubject
+                                                            .Subscribe<List<ItemPedido>>(
+                                                            (List<ItemPedido> items) => this._datosItemsPedido = items
+                                                        );
+
+            IDisposable _subscripClienteSubject = this._clienteSubject
+                                                    .Subscribe<Cliente>(
+                                                        (Cliente datosObs) => this._datoscliente = datosObs
+                                                        );
+
+            IDisposable _jwtSubject = this._jwtSubject
+                                        .Subscribe<String>(
+                                            (String datosJWT) => this._datosJWT = datosJWT
+                                        );
         }
         #region metodos servicio SubjectStorage
         #region metodos SINCRONOS
@@ -55,76 +66,105 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         }
         public void OperarElementosPedido(Libro libro, int cantidad, string operacion)
         {
-            //En funcion del valor de operacion, añado, quito, o elimino el elemento del pedido
-            //Si vale agregar, añado el elemento al pedido (si ya existe, aumento la cantidad)
-            //Si vale quitar, resto la cantidad del elemento del pedido (si la cantidad es 0, elimino el elemento del pedido)
-            //Si vale eliminar, elimino el elemento del pedido
-            //Una vez realizada la operacion, actualizo los datos del subject
-
-            if (operacion == "agregar")
+            try
             {
-                this.AgregarItemPedido(libro, cantidad);
-            }
-            else if (operacion == "quitar")
-            {
-                this.RestarItemPedido(libro, cantidad);
-            }
-            else if (operacion == "eliminar")
-            {
-                this.EliminarItemPedido(libro);
-            }
-        }
-
-        private void AgregarItemPedido(Libro libro, int cantidad)
-        {
-            //Busco si el libro ya existe en el pedido
-            ItemPedido itemPedido = this._datosItemsPedido.Find(item => item.LibroItem.ISBN13 == libro.ISBN13);
-            //Si el libro existe, aumento la cantidad
-            if (itemPedido != null)
-            {
-                itemPedido.CantidadItem += cantidad;
-            }
-            else
-            {
-                //Si el libro no existe, lo añado al pedido
-                itemPedido = new ItemPedido();
-                itemPedido.LibroItem = libro;
-                itemPedido.CantidadItem = cantidad;
-                this._datosItemsPedido.Add(itemPedido);
-            }
-            //Actualizo los datos del subject
-            this._itemsPedidoSubject.OnNext(this._datosItemsPedido);
-        }
-        private void RestarItemPedido(Libro libro, int cantidad)
-        {
-            //Busco si el libro ya existe en el pedido
-            ItemPedido itemPedido = this._datosItemsPedido.Find(item => item.LibroItem.ISBN13 == libro.ISBN13);
-            //Si el libro existe, compruebo si la cantidad a restar es mayor que la cantidad del pedido
-            if (itemPedido != null)
-            {
-                if (itemPedido.CantidadItem > cantidad)
+                //en funcion del valor del parametro "operacion" actualizo datos del observable del subject....
+                //agregar <--- añadir nuevo ItemPedido a la lista de items, comprobando antes si no existe (si existe inc.la cantidad)
+                //borrar <----borrar ItemPedido de la lista de items
+                //restar  <---- modificar cantidad de ItemPedido
+                switch (operacion)
                 {
-                    itemPedido.CantidadItem -= cantidad;
+                    case "agregar":
+                        AgregarElementoPedido(libro, cantidad);
+                        break;
+                    case "borrar":
+                        BorrarElementoPedido(libro);
+                        break;
+
+                    case "restar":
+                        RestarElementoPedido(libro, cantidad);
+                        break;
+
+                    default:
+                        break;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error en OperarElementos");
+                Console.WriteLine(ex.Message);
+            }
+
+        }
+        private void AgregarElementoPedido(Libro libro, int cantidad)
+        {
+            if (_datosItemsPedido == null)
+            {
+                Console.WriteLine("Lista de items del pedido vacia");
+                _datosItemsPedido = new List<ItemPedido>();
+            }
+            try
+            {
+                //añadir <--- añadir nuevo ItemPedido a la lista de items, comprobando antes si no existe (si existe inc.la cantidad)
+                int _posItem = this._datosItemsPedido.FindIndex((ItemPedido item) => item.LibroItem.ISBN13 == libro.ISBN13);
+                if (_posItem != -1)
+                {
+                    //el libro existe, incremento cantidad...
+                    this._datosItemsPedido[_posItem].CantidadItem += cantidad;
                 }
                 else
                 {
-                    //Si la cantidad a restar es mayor que la cantidad del pedido, elimino el elemento del pedido
-                    this._datosItemsPedido.Remove(itemPedido);
+                    //libro no existe en lista de items del pedido, añado nuevo itempedido 
+                    this._datosItemsPedido.Add(new ItemPedido { LibroItem = libro, CantidadItem = 1 });
+                }
+                Console.WriteLine("Operacion realizada con exito");
+                Console.WriteLine("Pedido:" + _datosItemsPedido);
+                //..actualizamos valor del observable del subject...
+                this._itemsPedidoSubject.OnNext(this._datosItemsPedido);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error en AgregarElementoPedido");
+                Console.WriteLine(ex.Message);
+            }
+        }
+        private void BorrarElementoPedido(Libro libro)
+        {
+            try
+            {
+                //borrar <----borrar ItemPedido de la lista de items
+                int _posItem = this._datosItemsPedido.FindIndex((ItemPedido item) => item.LibroItem.ISBN13 == libro.ISBN13);
+                if (_posItem != -1) this._datosItemsPedido.RemoveAt(_posItem);
+                //..actualizamos valor del observable del subject...
+                this._itemsPedidoSubject.OnNext(this._datosItemsPedido);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error en BorrarElementoPedido");
+                Console.WriteLine(ex.Message);
+            }
+        }
+        private void RestarElementoPedido(Libro libro, int cantidad)
+        {
+            try
+            {
+                int _posItem = this._datosItemsPedido.FindIndex((ItemPedido item) => item.LibroItem.ISBN13 == libro.ISBN13);
+                //Si el libro existe en la lista de items del pedido, decremento cantidad...
+                //Si la cantidad resultante es 0, elimino el item de la lista de items del pedido
+                if (_posItem != -1)
+                {
+                    this._datosItemsPedido[_posItem].CantidadItem -= cantidad;
+                    if (this._datosItemsPedido[_posItem].CantidadItem == 0) this._datosItemsPedido.RemoveAt(_posItem);
                 }
             }
-            //Actualizo los datos del subject
-            this._itemsPedidoSubject.OnNext(this._datosItemsPedido);
-        }
-        private void EliminarItemPedido(Libro libro)
-        {
-            //Busco si el libro ya existe en el pedido y lo elimino
-            ItemPedido itemPedido = this._datosItemsPedido.Find(item => item.LibroItem.ISBN13 == libro.ISBN13);
-            if (itemPedido != null)
+            catch (Exception ex)
             {
-                this._datosItemsPedido.Remove(itemPedido);
+                Console.WriteLine("Error en RestarElementoPedido");
+                Console.WriteLine(ex.Message);
             }
-            //Actualizo los datos del subject
-            this._itemsPedidoSubject.OnNext(this._datosItemsPedido);
+
+
         }
         public Cliente RecuperarDatosCliente()
         {

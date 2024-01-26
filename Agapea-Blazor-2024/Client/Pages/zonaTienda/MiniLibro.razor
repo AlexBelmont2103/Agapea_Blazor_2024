@@ -5,6 +5,7 @@
 @using Agapea_Blazor_2024.Client.Models.Services.Interfaces
 @inject NavigationManager navigate
 @inject IStorageService storageSvc
+@inject IJSRuntime jsService
 
 <div class="mb-3" style="max-width: 540px;" id="cardLibro-@libroAPintar.ISBN13"
      onmouseover="@(() => { this.estiloBotonComprar="visibility:visible"; } )"
@@ -19,11 +20,12 @@
                 </a>
             </div>
             <div class="m-3">
-                <button 
+                <a 
+                   @onclick="@AddLibroPedido"
                    class="btn btn-primary btn-sm"
                    style="@this.estiloBotonComprar">
                     Comprar...
-                </button>
+                </a>
             </div>
         </div>
 
@@ -49,8 +51,16 @@
 
     private void AddLibroPedido()
     {
-        //this.storageSvc.OperarElementosPedido(libroAPintar, 1, "agregar");
-        this.navigate.NavigateTo("/Tienda/MostrarPedido");
+        try
+        {
+            this.storageSvc.OperarElementosPedido(this.libroAPintar, 1, "agregar");
+            this.navigate.NavigateTo("/Tienda/MostrarPedido");
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
     }
 
 }
