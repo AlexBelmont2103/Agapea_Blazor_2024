@@ -99,6 +99,33 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 return new List<Categoria>();
             }
         }
+        [HttpGet]
+        public List<Provincia> RecuperarProvincias()
+        {
+            try
+            {
+                return this._dbContext.Provincias.AsEnumerable<Provincia>().OrderBy((Provincia p) => p.PRO).ToList<Provincia>();
+            }
+            catch (Exception ex)
+            {
+
+                return new List<Provincia>();
+            }
+        }
+
+        [HttpGet]
+        public List<Municipio> RecuperarMunicipios([FromQuery] String cpro)
+        {
+            try
+            {
+                return this._dbContext.Municipios.Where((Municipio muni) => muni.CPRO == cpro).ToList<Municipio>();
+            }
+            catch (Exception ex)
+            {
+
+                return new List<Municipio>();
+            }
+        }
         #endregion
     }
 }

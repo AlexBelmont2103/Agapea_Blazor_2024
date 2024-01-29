@@ -3,11 +3,33 @@
 
 @inject IStorageService storageSvc
 @inject NavigationManager navigate
+@inject IRestService restSvc
 
 <div class="container">
     <div class="row">
         <!-- columna para datos del pedido: direccion envio, facturacion, datos pago-->
-        <div class="col-7"></div>
+        <div class="col-7">
+            <form>
+                <CascadingValue Name="clienteLogged" Value="clienteLogged">
+                    <CascadingValue Name="listaProvincias" Value="listaProvincias">
+
+                        <DatosEntregaPedido ShowDatosFacturaEvent="@((valor)=>{ this.ShowDatosFacturaPedido=valor; })"></DatosEntregaPedido>
+                        @if (this.ShowDatosFacturaPedido)
+                        {
+                            <DatosFacturacionPedido></DatosFacturacionPedido>
+                        }
+                        <DatosPagoPedido tituloPago="@(this.ShowDatosFacturaPedido==true ? "3. - Pago" : "2. - Pago")"></DatosPagoPedido>
+
+                    </CascadingValue>
+                </CascadingValue>
+
+                <div class="d-flex flex-row justify-content-center mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-truck-fast"></i>  Finalizar Pedido
+                    </button>
+                </div>
+            </form>
+        </div>
 
         <!-- columna para elementos del pedido, subtotal, gastos envio y total -->
         <div class="col-5">
@@ -63,17 +85,20 @@
 
 @code {
     public List<ItemPedido> _listaItems { get; set; } = new List<ItemPedido>();
+    public Cliente clienteLogged { get; set; }
+    public List<Provincia> listaProvincias { get; set; }
+    private bool ShowDatosFacturaPedido { get; set; } = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        
+        this.clienteLogged = this.storageSvc.RecuperarDatosCliente();
         this._listaItems = this.storageSvc.RecuperarElementosPedido();
-        Console.WriteLine("Pedido: " + this._listaItems);
+        this.listaProvincias = await this.restSvc.RecuperarProvincias();
     }
 
     public void ModificarItemPedido(KeyValuePair<String, ItemPedido> datos)
     {
-        this.storageSvc.OperarElementosPedido(datos.Value.LibroItem, datos.Value.CantidadItem, datos.Key);
+        this.storageSvc.OperarElementosPedido(datos.Value.LibroItem, datos.Key);
         StateHasChanged();
     }
 }

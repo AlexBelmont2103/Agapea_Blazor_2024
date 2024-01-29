@@ -29,7 +29,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         {
             throw new NotImplementedException();
         }
-        public void OperarElementosPedido(Libro libro, int cantidad, string operacion)
+        public void OperarElementosPedido(Libro libro, string operacion)
         {
             throw new NotImplementedException();
         }

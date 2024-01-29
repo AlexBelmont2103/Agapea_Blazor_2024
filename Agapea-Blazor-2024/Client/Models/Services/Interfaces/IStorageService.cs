@@ -12,16 +12,16 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         #region metodos SÍNCRONOS de almacenamiento de valores en servicios storage (OBSERVABLES)
         void AlmacenamientoDatosCliente(Cliente datoscliente);
         void AlmacenamientoJWT(String tokenJWT);
-        void OperarElementosPedido(Libro libro, int cantidad, string operacion);
+        void OperarElementosPedido(Libro libro, string operacion);
         Cliente RecuperarDatosCliente();
         String RecuperarJWT();
-        
+
         List<ItemPedido> RecuperarElementosPedido();
         #endregion
 
         #region metodos ASÍNCRONOS de almacenamiento de valores en servicios storage (LOCALSTORAGE, INDEXEDDB, SESSIONSTORAGE)
         Task AlmacenamientoDatosClienteAsync(Cliente datoscliente);
-        Task AlmacenamientoJWTAsync (String tokenJWT);
+        Task AlmacenamientoJWTAsync(String tokenJWT);
         Task OperarElementosPedidoAsync(Libro libro, int cantidad, string operacion);
         Task<Cliente> RecuperarDatosClienteAsync();
         Task<String> RecuperarJWTAsync();

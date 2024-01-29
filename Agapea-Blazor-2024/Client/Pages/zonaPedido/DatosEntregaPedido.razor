@@ -1,0 +1,189 @@
+﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inject IRestService restSvc
+@inject IJSRuntime JSRuntime
+
+<div class="row mt-4">
+    <div class="col-1"><img src="/images/img1_mostrar_pedido_datosentrega.png" style="width: 40px; height:26px;" alt='...' /></div>
+    <div class="col-11"><h4><strong>1.- Datos de entrega</strong></h4></div>
+</div>
+
+@* -- fila de radios para seleccionar direccion principal de envio del cliente u otra nueva... -- *@
+<div class="row">
+
+    @if (this.direccionprincipal != null)
+    {
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="direccionradios" id="direccionprincipal" value="direccionprincipal" checked onchange="@(()=>{ this.checkdirppalenvio=true; })" />
+            <label class="form-check-label" for="direccionprincipal">
+                @this.direccionprincipal.Calle. @this.direccionprincipal.MunicipioDirec.DMUN50, @this.direccionprincipal.ProvinciaDirec.PRO CP: @this.direccionprincipal.CP @this.direccionprincipal.Pais
+            </label>
+        </div>
+    }
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="direccionradios" id="direccionagapea" disabled />
+        <label class="form-check-label" for="direccionagapea">
+            Recoger en libreria Agapea (No disponible en este momento. Puede hacer el pedido para el envio a domicilio)
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="direccionradios" id="direccionotra" value="otradireccion" onchange="@(()=>{ this.checkdirppalenvio=false; })" />
+        <label class="form-check-label" for="direccionotra">
+            Recibir en otra direccion
+        </label>
+    </div>
+
+</div>
+
+@* -- fila de campos para nueva direccion envio solo si esta chequeado RADIO OTRA DIRECCION-- *@
+@if (!this.checkdirppalenvio)
+{
+    <div class="row mt-2" id="filadireccioncontainer">
+
+        <div class="container" id="direccioncontainer">
+            <div class="row">
+                <div class="col-6">
+                    <label for="inputPais" class="form-label">Pais</label>
+                    <input type="text" class="form-control" id="inputPais" placeholder="España" name="pais" />
+                </div>
+                <div class="col-6">
+                    <label for="inputProvincia" class="form-label">Provincia*</label>
+                    <select id="inputProvincia" class="form-select" name="provincia" @onchange="OnChangeProvincia">
+                        <option value="-1" selected> - Seleccionar Provincia - </option>
+                        @foreach (Provincia unaprov in this.listaProvincias)
+                        {
+                            <option value="@String.Concat(unaprov.CPRO,"-",unaprov.PRO)">@unaprov.PRO</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class='row'>
+                <div class="col-6">
+                    <label for="inputCalle" class="form-label">Direccion completa*</label>
+                    <input type="text" class="form-control" id="inputCalle" placeholder="Mi Direccion" name="calle" />
+                </div>
+
+                <div class="col-2">
+                    <label for="inputCP" class="form-label">Codigo Postal*</label>
+                    <input type="text" class="form-control" id="inputCP" placeholder="Codigo Postal: 28803" name="cp" />
+                </div>
+
+
+                <div class="col-4">
+                    <label for="inputMunicipio" class="form-label">Localidad*</label>
+                        <select id="inputMunicipio" class="form-select" name="municipio" disabled="@isDisabled">
+                            <option value="-1" selected> - Selecciona un Municipio -</option>
+                            @foreach (Municipio unamun in this.listaMunicipios)
+                            {
+                                <option value="@String.Concat(unamun.CMUM,"-",unamun.DMUN50)">@unamun.DMUN50</option>
+                            }
+                        </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+
+
+
+@* -- fila de radios para seleccionar datos de contacto persona de envio  -- *@
+<div class="row">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="personaenvioradios" id="clienteloggedenvio" value="clienteloggedenvio" checked onchange="@(()=>{ this.checkclienteloggedenvio=true; })" />
+        <label class="form-check-label" for="clienteloggedenvio">
+            Datos de usuario registrado
+            @this.clienteLogged.Credenciales.Email ( @this.clienteLogged.Credenciales.Login )
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="personaenvioradios" id="otrapersonaenvio" value="otrapersonaenvio" onchange="@(()=>{ this.checkclienteloggedenvio=false; })" />
+        <label class="form-check-label" for="otrapersonaenvio">
+            Usar otros datos
+        </label>
+    </div>
+</div>
+
+@* -- fila de campos para datos de persona de envio -- *@
+<div class='row'>
+    @if (this.checkclienteloggedenvio)
+    {
+        <div class='col-3'></div>
+        <div class="col-6">
+            <label for="telefonoContacto" class="form-label">Telefono de contacto*</label>
+            <input type="text" class="form-control" id="telefonoContacto" placeholder="@this.clienteLogged.Telefono" name="telefonoContacto" />
+        </div>
+
+    }
+    else
+    {
+        <div class='col-6'>
+            <label for="nombreEnvio" class="form-label">Nombre*</label>
+            <input type="text" class="form-control" id="nombreEnvio" name="nombreEnvio" />
+        </div>
+        <div class='col-6'>
+            <label for="apellidosEnvio" class="form-label">Apellidos*</label>
+            <input type="text" class="form-control" id="apellidosEnvio" name="apellidosEnvio" />
+        </div>
+
+        <div class='col-6'>
+            <label for="emailEnvio" class="form-label">Correo Electronico*</label>
+            <input type="text" class="form-control" id="emailEnvio" name="emailEnvio" />
+        </div>
+        <div class='col-6'>
+            <label for="telefonoContactoNuevo" class="form-label">Telefono de contacto*</label>
+            <input type="text" class="form-control" id="telefonoContactoNuevo" name="telefonoContacto" />
+        </div>
+
+    }
+
+    <div class='col-12'>
+        <label for="otrosDatos" class="form-label">Otros datos de entrega*</label>
+        <input type="text" class="form-control" id="otrosDatos" name="otrosDatos" />
+    </div>
+</div>
+
+<div class="row">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="checkfactura"
+               @onchange="@(async (ChangeEventArgs ev)=>await this.ShowDatosFacturaEvent.InvokeAsync((bool)ev.Value))">
+        <label class="form-check-label" for="checkfactura">
+            Deseo Factura
+        </label>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter(Name = "clienteLogged")]
+    public Cliente clienteLogged { get; set; }
+
+    [CascadingParameter(Name = "listaProvincias")]
+    public List<Provincia> listaProvincias { get; set; }
+
+
+
+    [Parameter]
+    public EventCallback<bool> ShowDatosFacturaEvent { get; set; } = new EventCallback<bool>();
+
+    private bool checkdirppalenvio { get; set; } = true;
+    private bool checkclienteloggedenvio { get; set; } = true;
+    private bool isDisabled { get; set; } = true;
+
+    private List<Municipio> listaMunicipios { get; set; } = new List<Municipio>();
+    private Direccion direccionprincipal;
+
+
+    protected override void OnParametersSet()
+    {
+        if (this.clienteLogged.DireccionesCliente.Count > 0) this.direccionprincipal = this.clienteLogged.DireccionesCliente.Where(dir => dir.EsPrincipal == true).Single<Direccion>();
+    }
+
+    private async Task OnChangeProvincia(ChangeEventArgs ev)
+    {
+        String[] datosprov = ev.Value.ToString().Split('-');
+        this.listaMunicipios = await this.restSvc.RecuperarMunicipios(datosprov[0]);
+        if(this.listaMunicipios.Count > 0) this.isDisabled = false;
+        else this.isDisabled = true;
+        StateHasChanged();
+    }
+
+}

@@ -64,7 +64,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         {
             this._jwtSubject.OnNext(tokenJWT); //Actualizo los datos del subject
         }
-        public void OperarElementosPedido(Libro libro, int cantidad, string operacion)
+        public void OperarElementosPedido(Libro libro, string operacion)
         {
             try
             {
@@ -75,14 +75,14 @@ namespace Agapea_Blazor_2024.Client.Models.Services
                 switch (operacion)
                 {
                     case "agregar":
-                        AgregarElementoPedido(libro, cantidad);
+                        AgregarElementoPedido(libro);
                         break;
                     case "borrar":
                         BorrarElementoPedido(libro);
                         break;
 
                     case "restar":
-                        RestarElementoPedido(libro, cantidad);
+                        RestarElementoPedido(libro);
                         break;
 
                     default:
@@ -97,7 +97,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             }
 
         }
-        private void AgregarElementoPedido(Libro libro, int cantidad)
+        private void AgregarElementoPedido(Libro libro)
         {
             if (_datosItemsPedido == null)
             {
@@ -111,7 +111,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
                 if (_posItem != -1)
                 {
                     //el libro existe, incremento cantidad...
-                    this._datosItemsPedido[_posItem].CantidadItem += cantidad;
+                    this._datosItemsPedido[_posItem].CantidadItem += 1;
                 }
                 else
                 {
@@ -119,7 +119,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
                     this._datosItemsPedido.Add(new ItemPedido { LibroItem = libro, CantidadItem = 1 });
                 }
                 Console.WriteLine("Operacion realizada con exito");
-                Console.WriteLine("Pedido:" + _datosItemsPedido);
+
                 //..actualizamos valor del observable del subject...
                 this._itemsPedidoSubject.OnNext(this._datosItemsPedido);
             }
@@ -145,7 +145,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
                 Console.WriteLine(ex.Message);
             }
         }
-        private void RestarElementoPedido(Libro libro, int cantidad)
+        private void RestarElementoPedido(Libro libro)
         {
             try
             {
@@ -154,7 +154,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
                 //Si la cantidad resultante es 0, elimino el item de la lista de items del pedido
                 if (_posItem != -1)
                 {
-                    this._datosItemsPedido[_posItem].CantidadItem -= cantidad;
+                    this._datosItemsPedido[_posItem].CantidadItem -= 1;
                     if (this._datosItemsPedido[_posItem].CantidadItem == 0) this._datosItemsPedido.RemoveAt(_posItem);
                 }
             }

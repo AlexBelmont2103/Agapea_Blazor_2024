@@ -16,5 +16,9 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         Task<Libro> RecuperarLibro(String isbn13);
         Task<List<Categoria>> RecuperarCategorias(String idcat);
         #endregion
+        #region metodos para zonaPedido
+        Task<List<Provincia>> RecuperarProvincias();
+        Task<List<Municipio>> RecuperarMunicipios(String cpro);
+        #endregion
     }
 }

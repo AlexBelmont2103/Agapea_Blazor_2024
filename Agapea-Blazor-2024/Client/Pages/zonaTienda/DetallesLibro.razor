@@ -2,7 +2,8 @@
 @using Agapea_Blazor_2024.Client.Models.Services.Interfaces
 @inject IRestService restSvc
 @inject IJSRuntime jsSvc
-
+@inject NavigationManager navigate
+@inject IStorageService storageSvc
 <div class="row">
     <div class="col-8">
         <div class="mb-3" style="max-width: 540px;">
@@ -15,7 +16,7 @@
                             </div>
                         </div>
                         <div class="row mt-3">
-                            <a class="btn btn-primary btn-sm" style="visibility: visible;">Comprar</a>
+                            <a onclick="@AddLibroPedido" class="btn btn-primary btn-sm" style="visibility: visible;">Comprar</a>
                         </div>
                     </div>
                 </div>
@@ -68,7 +69,7 @@
                     </div>
                 </div>
                 <div class="d-flex justify-content-center py-3 px-1">
-                    <a class="btn btn-primary w-100 p-2" style="border-radius: 0px"><i class="fa-solid fa-cart-shopping pe-2"></i><strong> Comprar / Recoger</strong></a>
+                    <a onclick="@AddLibroPedido" class="btn btn-primary w-100 p-2" style="border-radius: 0px"><i class="fa-solid fa-cart-shopping pe-2"></i><strong> Comprar / Recoger</strong></a>
                 </div>
                 <div class="d-flex flex-row justify-content-between px-1">
                     <a class="btn btn-outline-primary p-2 flex-fill" style="border-radius: 0px"> <small>Agregar a la lista de deseos</small></a>
@@ -91,10 +92,23 @@
     [Parameter]
     public String isbn13 { get; set; }
 
-    public Libro libro { get; set; }
+    public Libro libro { get; set; } = new Libro();
 
     protected override async Task OnInitializedAsync()
     {
         this.libro = await this.restSvc.RecuperarLibro(this.isbn13);
+    }
+    private void AddLibroPedido()
+    {
+        try
+        {
+            this.storageSvc.OperarElementosPedido(this.libro, "agregar");
+            this.navigate.NavigateTo("/Tienda/MostrarPedido");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
     }
 }

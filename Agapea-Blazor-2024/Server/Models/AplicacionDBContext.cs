@@ -25,6 +25,8 @@ namespace Agapea_Blazor_2024.Server.Models
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<ItemPedido> ItemsPedido { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Provincia> Provincias { get; set; }
+        public DbSet<Municipio> Municipios { get; set; }
 
 
         #endregion
@@ -126,6 +128,12 @@ namespace Agapea_Blazor_2024.Server.Models
             #region /// CREACION DE TABLA CATEGORIAS A PARTIR DE LA CLASE MODELO CATEGORIA
             //builder.Entity<Categoria>().ToTable("Categorias");
             builder.Entity<Categoria>().HasNoKey();
+            #endregion
+            #region /// CREACION DE TABLA PROVINCIAS A PARTIR DE LA CLASE MODELO PROVINCIA
+            builder.Entity<Provincia>().HasNoKey();
+            #endregion
+            #region /// CREACION DE TABLA MUNICIPIOS A PARTIR DE LA CLASE MODELO MUNICIPIO
+            builder.Entity<Municipio>().HasNoKey();
             #endregion
         }
         #endregion

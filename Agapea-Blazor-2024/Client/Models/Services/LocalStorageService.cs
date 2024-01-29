@@ -24,7 +24,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         {
             throw new NotImplementedException();
         }
-        public Task OperarElementosPedidoAsync(Libro libro, int cantidad, string operacion)
+        public Task OperarElementosPedidoAsync(Libro libro, string operacion)
         {
             throw new NotImplementedException();
         }
@@ -65,6 +65,16 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             throw new NotImplementedException();
         }
         public Task<List<ItemPedido>> RecuperarElementosPedidoAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OperarElementosPedido(Libro libro, string operacion)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task OperarElementosPedidoAsync(Libro libro, int cantidad, string operacion)
         {
             throw new NotImplementedException();
         }

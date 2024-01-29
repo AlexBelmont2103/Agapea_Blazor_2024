@@ -46,8 +46,40 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             return await this._httpClient
                             .GetFromJsonAsync<Libro>($"/api/RESTTienda/RecuperarLibro?isbn13={isbn13}") ?? new Libro();
         }
-        #endregion
 
+
+        #endregion
+        #region ///// llamada endpoints zona Pedido /////
+
+        public async Task<List<Provincia>> RecuperarProvincias()
+        {
+            try
+            {
+                return await this._httpClient
+                            .GetFromJsonAsync<List<Provincia>>($"/api/RESTTienda/RecuperarProvincias") ?? new List<Provincia>();
+            }
+            catch (Exception ex)
+            {
+                return new List<Provincia>();
+            }
+
+        }
+
+        public async Task<List<Municipio>> RecuperarMunicipios(string cpro)
+        {
+            try
+            {
+                return await this._httpClient
+                            .GetFromJsonAsync<List<Municipio>>($"/api/RESTTienda/RecuperarMunicipios?cpro={cpro}") ?? new List<Municipio>();
+            }
+            catch (Exception ex)
+            {
+                return new List<Municipio>();
+            }
+
+        }
+
+        #endregion
         #endregion
     }
 }

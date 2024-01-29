@@ -23,7 +23,7 @@
 
                         <label><small>@elemento.CantidadItem</small></label>
 
-                        <a class="btn btn-outline-primary btn-sm" onclick="@(()=>@HandlerBotones("sumar"))">
+                        <a class="btn btn-outline-primary btn-sm" onclick="@(()=>@HandlerBotones("agregar"))">
                             <strong>+</strong>
                         </a>
 
@@ -49,13 +49,7 @@
 
     private async Task HandlerBotones(String operacion)
     {
-        switch (operacion)
-        {
-            case "sumar": this.elemento.CantidadItem += 1; break;
-            case "restar": this.elemento.CantidadItem -= 1; break;
-            case "borrar": this.elemento.CantidadItem = 0; break;
-        }
-        this.operarItemEvent.InvokeAsync(new KeyValuePair<string, ItemPedido>(operacion, elemento));
+        await this.operarItemEvent.InvokeAsync(new KeyValuePair<string, ItemPedido>(operacion, this.elemento));
     }
 
 }
