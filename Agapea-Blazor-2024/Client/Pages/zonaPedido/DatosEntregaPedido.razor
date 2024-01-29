@@ -181,7 +181,10 @@
     {
         String[] datosprov = ev.Value.ToString().Split('-');
         this.listaMunicipios = await this.restSvc.RecuperarMunicipios(datosprov[0]);
-        if(this.listaMunicipios.Count > 0) this.isDisabled = false;
+        if (this.listaMunicipios.Count > 0)
+        {
+            this.isDisabled = false;
+        }
         else this.isDisabled = true;
         StateHasChanged();
     }
