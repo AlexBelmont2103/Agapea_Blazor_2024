@@ -1,6 +1,7 @@
 ﻿using Agapea_Blazor_2024.Server.Models;
 using Agapea_Blazor_2024.Shared;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Agapea_Blazor_2024.Server.Controllers
@@ -124,6 +125,20 @@ namespace Agapea_Blazor_2024.Server.Controllers
             {
 
                 return new List<Municipio>();
+            }
+        }
+        [HttpPost]
+        public String FinalizarPedido([FromBody] Dictionary<string, string> dic)
+        {
+            try
+            {
+                DatosPago datosPago = JsonSerializer.Deserialize<DatosPago>(dic["datosPago"]);
+                Pedido pedido = JsonSerializer.Deserialize<Pedido>(dic["pedido"]);
+                return "Pedido finalizado con exito";
+            }
+            catch (Exception ex)
+            {
+                return "";
             }
         }
         #endregion
