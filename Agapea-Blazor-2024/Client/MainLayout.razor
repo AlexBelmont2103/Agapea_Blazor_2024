@@ -64,7 +64,7 @@
                             <!-- mini carrito -->
                             <a onclick="@(()=>this.navigate.NavigateTo("/Pedido/MostrarPedido"))" class="h-100 bg-white border border-dark border-1 btn btn-light">
                                 <img src="/images/boton_mini_carrito.png" />
-                                <span class="text-dark badge badge-danger  ps-1 pe-1"> <small>Total:</small> <span class="text-end" id="precioCarrito" style="width: 110px; font-size: 1.2em">0.00 €</span></span>
+                                <span class="text-dark badge badge-danger  ps-1 pe-1"> <small>Total:</small> <span class="text-end" id="precioCarrito" style="width: 110px; font-size: 1.2em">@Subtotal €</span></span>
 
                                 <img class="align-content-lg-center" src="/images/boton_flecha_minicarrito.png" />
                             </a>
@@ -102,27 +102,53 @@
 
 @code {
     public Cliente clienteLogged { get; set; }
-   
+    public List<ItemPedido> _listaItems { get; set; } = new List<ItemPedido>();
+    public Decimal Subtotal { get; set; } = 0;
 
     protected override async Task OnInitializedAsync()
     {
         //Recuperar datos del cliente logueado
-        
+
         //Version sincrona (observables)
         this.storageService.RecuperarDatosCliente();
         //Version asincrona (IndexedDB)
         //this.storageService.RecuperarDatosClienteAsync();
         this.storageService.ClienteRecupIndexedDBEvent += RecuperarDatos;
-        //Mostrar en consola los datos del cliente
-        
+        this.storageService.ItemsPedidoRecupIndexedDBEvent += RecuperarItemsPedido;
+
+
+    }
+    private Decimal CalcularSubTotal()
+    {
+        Decimal subtotal = 0;
+        if (this._listaItems.Count > 0)
+        {
+            foreach (ItemPedido item in this._listaItems)
+            {
+                subtotal += Math.Round(item.LibroItem.Precio * item.CantidadItem, 2);
+            }
+        }
+        else
+        {
+            subtotal = 0;
+        }
+
+        return subtotal;
     }
     private void RecuperarDatos(object sender, Cliente datoscliente)
     {
         this.clienteLogged = datoscliente;
         this.StateHasChanged();
     }
+    private void RecuperarItemsPedido(object sender, List<ItemPedido> items)
+    {
+        this._listaItems = items;
+        this.Subtotal = CalcularSubTotal();
+        this.StateHasChanged();
+    }
     public void Dispose()
     {
         this.storageService.ClienteRecupIndexedDBEvent -= RecuperarDatos;
+        this.storageService.ItemsPedidoRecupIndexedDBEvent -= RecuperarItemsPedido;
     }
 }

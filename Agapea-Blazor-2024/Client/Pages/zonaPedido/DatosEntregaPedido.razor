@@ -43,7 +43,7 @@
             <div class="row">
                 <div class="col-6">
                     <label for="inputPais" class="form-label">Pais</label>
-                    <input type="text" class="form-control" id="inputPais" placeholder="España" name="pais" />
+                    <InputText @bind-Value="Model.DireccionEnvio.Pais" type="text" class="form-control" id="inputPais" placeholder="España" name="pais" />
                 </div>
                 <div class="col-6">
                     <label for="inputProvincia" class="form-label">Provincia*</label>
@@ -118,7 +118,7 @@
     {
         <div class='col-6'>
             <label for="nombreEnvio" class="form-label">Nombre*</label>
-            <input type="text" class="form-control" id="nombreEnvio" name="nombreEnvio" />
+            <InputText @bind-Value="Model.NombreEnvio" type="text" class="form-control" id="nombreEnvio" name="nombreEnvio" />
         </div>
         <div class='col-6'>
             <label for="apellidosEnvio" class="form-label">Apellidos*</label>
@@ -159,7 +159,8 @@
     [CascadingParameter(Name = "listaProvincias")]
     public List<Provincia> listaProvincias { get; set; }
 
-
+    [Parameter]
+    public DatosPago Model { get; set;}
 
     [Parameter]
     public EventCallback<bool> ShowDatosFacturaEvent { get; set; } = new EventCallback<bool>();

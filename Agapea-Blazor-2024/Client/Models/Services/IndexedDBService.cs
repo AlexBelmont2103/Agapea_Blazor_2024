@@ -12,6 +12,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         //Propiedad de tipo evento que vamos a usar para notificar a aquellos componentes que usen este servicio
         //que se han recuperado datos de IndexedDB (en este caso, el cliente) y ya están disponibles
         public event EventHandler<Cliente> ClienteRecupIndexedDBEvent;
+        public event EventHandler<List<ItemPedido>> ItemsPedidoRecupIndexedDBEvent;
         #endregion
         public IndexedDBService(IJSRuntime jsServiceDI)
         {

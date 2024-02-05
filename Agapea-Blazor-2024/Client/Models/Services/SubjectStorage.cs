@@ -29,6 +29,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
          */
         #region propiedades del servicio
         public event EventHandler<Cliente> ClienteRecupIndexedDBEvent;
+        public event EventHandler<List<ItemPedido>> ItemsPedidoRecupIndexedDBEvent;
         private BehaviorSubject<Cliente> _clienteSubject = new BehaviorSubject<Cliente>(null);
         private BehaviorSubject<String> _jwtSubject = new BehaviorSubject<string>("");
         private BehaviorSubject<List<ItemPedido>> _itemsPedidoSubject = new BehaviorSubject<List<ItemPedido>>(null);
@@ -88,6 +89,8 @@ namespace Agapea_Blazor_2024.Client.Models.Services
                     default:
                         break;
                 }
+                //Lanzo el evento por si alguien lo esta escuchando
+                this.ItemsPedidoRecupIndexedDBEvent.Invoke(this, this._datosItemsPedido);
 
             }
             catch (Exception ex)

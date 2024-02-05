@@ -9,26 +9,23 @@
     <div class="row">
         <!-- columna para datos del pedido: direccion envio, facturacion, datos pago-->
         <div class="col-7">
-            <form>
-                <CascadingValue Name="clienteLogged" Value="clienteLogged">
-                    <CascadingValue Name="listaProvincias" Value="listaProvincias">
-
-                        <DatosEntregaPedido ShowDatosFacturaEvent="@((valor)=>{ this.ShowDatosFacturaPedido=valor; })"></DatosEntregaPedido>
+            <CascadingValue Name="clienteLogged" Value="clienteLogged">
+                <CascadingValue Name="listaProvincias" Value="listaProvincias">
+                    <EditForm Model="@datosPago" OnSubmit="HandleSubmit">
+                        <DatosEntregaPedido Model="@datosPago" ShowDatosFacturaEvent="@((valor)=>{ this.ShowDatosFacturaPedido=valor; })"></DatosEntregaPedido>
                         @if (this.ShowDatosFacturaPedido)
                         {
-                            <DatosFacturacionPedido></DatosFacturacionPedido>
+                            <DatosFacturacionPedido Model="@datosPago"></DatosFacturacionPedido>
                         }
-                        <DatosPagoPedido tituloPago="@(this.ShowDatosFacturaPedido==true ? "3. - Pago" : "2. - Pago")"></DatosPagoPedido>
-
-                    </CascadingValue>
+                        <DatosPagoPedido Model="@datosPago" tituloPago="@(this.ShowDatosFacturaPedido==true ? "3. - Pago" : "2. - Pago")"></DatosPagoPedido>
+                    </EditForm>
                 </CascadingValue>
-
-                <div class="d-flex flex-row justify-content-center mt-3">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fa-solid fa-truck-fast"></i>  Finalizar Pedido
-                    </button>
-                </div>
-            </form>
+            </CascadingValue>
+            <div class="d-flex flex-row justify-content-center mt-3">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fa-solid fa-truck-fast"></i>  Finalizar Pedido
+                </button>
+            </div>
         </div>
 
         <!-- columna para elementos del pedido, subtotal, gastos envio y total -->
@@ -49,17 +46,17 @@
 
                 <div class="row">
                     <div class="col-10"><p><strong>Subtotal:</strong></p></div>
-                    <div class="col-2"><p style="color:red">0 €</p></div>
+                    <div class="col-2"><p style="color:red">@Subtotal €</p></div>
                 </div>
 
                 <div class="row">
                     <div class="col-10"><p><strong>Gastos de envio y Gestion:</strong></p></div>
-                    <div class="col-2"><p style="color:red">0 €</p></div>
+                    <div class="col-2"><p style="color:red">@GastosEnvio €</p></div>
                 </div>
 
                 <div class="row" style="background: grey">
                     <div class="col-10"><p><strong>Total a pagar:</strong></p></div>
-                    <div class="col-2"><p style="color:red">0 €</p></div>
+                    <div class="col-2"><p style="color:red">@Total €</p></div>
                 </div>
 
                 <div class="row">
@@ -88,17 +85,48 @@
     public Cliente clienteLogged { get; set; }
     public List<Provincia> listaProvincias { get; set; }
     private bool ShowDatosFacturaPedido { get; set; } = false;
+    public DatosPago? datosPago;
+    public Decimal Subtotal { get; set; }
+    public Decimal GastosEnvio { get; set; } = 0;
+    public Decimal Total { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         this.clienteLogged = this.storageSvc.RecuperarDatosCliente();
         this._listaItems = this.storageSvc.RecuperarElementosPedido();
         this.listaProvincias = await this.restSvc.RecuperarProvincias();
+        this.datosPago = new DatosPago();
+        this.Subtotal = CalcularSubtotal();
+        this.Total=CalcularTotal();
     }
 
     public void ModificarItemPedido(KeyValuePair<String, ItemPedido> datos)
     {
         this.storageSvc.OperarElementosPedido(datos.Value.LibroItem, datos.Key);
+        //Aprovechamos para calcular el subtotal
+        this.Subtotal = CalcularSubtotal();
+        this.Total = CalcularSubtotal();
         StateHasChanged();
+    }
+    private Decimal CalcularSubtotal()
+    {
+        Decimal subtotal = 0;
+        foreach (ItemPedido item in this._listaItems)
+        {
+            subtotal += Math.Round(item.LibroItem.Precio * item.CantidadItem, 2);
+        }
+        return subtotal;
+    }
+    private Decimal CalcularTotal()
+    {
+        return this.Subtotal + this.GastosEnvio;
+    }
+    private void HandleSubmit()
+    {
+        //Hacemos preventDefault para evitar que se recargue la página
+
+        //Mostramos el formulario por consola
+        Console.WriteLine("Formulario enviado");
+        Console.WriteLine(datosPago);
     }
 }

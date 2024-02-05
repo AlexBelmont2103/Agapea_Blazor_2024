@@ -99,6 +99,8 @@
     [CascadingParameter(Name = "listaProvincias")]
     public List<Provincia> listaProvincias { get; set; }
 
+    [Parameter]
+    public DatosPago Model { get; set; }
     private bool checkempresa { get; set; } = true;
     private bool checkmismadirecfactura { get; set; } = true;
 }

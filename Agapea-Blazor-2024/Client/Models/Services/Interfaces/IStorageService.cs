@@ -8,6 +8,8 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         //Propiedad de tipo evento que vamos a usar para notificar a aquellos componentes que usen este servicio
         //que se han recuperado datos de IndexedDB (en este caso, el cliente) y ya están disponibles
         public event EventHandler<Cliente> ClienteRecupIndexedDBEvent;
+        //Hacemos lo mismo con la lista de elementos del pedido
+        public event EventHandler<List<ItemPedido>> ItemsPedidoRecupIndexedDBEvent;
         #endregion
         #region metodos SÍNCRONOS de almacenamiento de valores en servicios storage (OBSERVABLES)
         void AlmacenamientoDatosCliente(Cliente datoscliente);
