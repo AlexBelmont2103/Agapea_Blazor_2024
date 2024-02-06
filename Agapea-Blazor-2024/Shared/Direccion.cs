@@ -3,6 +3,7 @@
     public class Direccion
     {
         #region ...propiedades clase direccion....
+        public String IdCliente { get; set; } = "";
         public String IdDireccion { get; set; } = Guid.NewGuid().ToString();
         public String Calle { get; set; } = "";
         public int CP { get; set; } = 0;

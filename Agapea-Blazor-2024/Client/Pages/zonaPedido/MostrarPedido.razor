@@ -161,6 +161,7 @@
             Console.WriteLine("Formulario enviado");
             //Construimos el pedido con el objeto datoPago
             this.pedido = new Pedido();
+            this.pedido.IdCliente = this.clienteLogged.IdCliente;
             this.pedido.ElementosPedido = this._listaItems;
             this.pedido.DireccionEnvio = this.datosPago.DireccionEnvio;
             this.pedido.DireccionFacturacion = this.datosPago.DireccionFactura;
@@ -168,8 +169,10 @@
             this.pedido.GastosEnvio = this.GastosEnvio;
             this.pedido.Total = this.Total;
             this.pedido.EstadoPedido = "Pendiente";
-            string resp = await this.restSvc.FinalizarPedido(this.datosPago, this.pedido);
-            Console.WriteLine(resp);
+            string _urlSalto = await this.restSvc.FinalizarPedido(this.datosPago, pedido);
+            await this.JSRuntime.InvokeVoidAsync("console.log", "URL SALTO PAYPAL....", _urlSalto);
+
+            await this.JSRuntime.InvokeVoidAsync("window.location.assign", _urlSalto);
         }
 
         else

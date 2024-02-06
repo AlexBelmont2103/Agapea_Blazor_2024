@@ -16,6 +16,7 @@
         public String Resumen { get; set; } = "";
         public int NumeroPaginas { get; set; } = 0;
         public Decimal Precio { get; set; } = 0;
+        //public List<Opinion> OpinionesLibro { get; set; } = new List<Opinion>();
 
         #endregion
 

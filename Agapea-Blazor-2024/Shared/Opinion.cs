@@ -3,9 +3,10 @@
     public class Opinion
     {
         #region ....propiedades clase opinion...
-        public String IdOpinion { get; set; } = Guid.NewGuid().ToString();
         public String IdCliente { get; set; } = "";
-        public String IdLibro { get; set; } = "";
+        public Cliente cliente { get; set; }
+        public String IdOpinion { get; set; } = Guid.NewGuid().ToString();
+        public String isbn13 { get; set; } = "";
         public String Comentario { get; set; } = "";
         public int Valoracion { get; set; } = 0;
         public DateTime Fecha { get; set; } = DateTime.Now;
@@ -14,10 +15,10 @@
         public Opinion()
         {
         }
-        public Opinion(String idCliente, String idLibro, String comentario, int valoracion)
+        public Opinion(String idCliente, String isbn13, String comentario, int valoracion)
         {
             this.IdCliente = idCliente;
-            this.IdLibro = idLibro;
+            this.isbn13 = isbn13;
             this.Comentario = comentario;
             this.Valoracion = valoracion;
         }
