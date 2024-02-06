@@ -22,9 +22,9 @@
         public String MetodoPago { get; set; } = "";
         public String NumeroTarjeta { get; set; } = "";
         public String NombreBanco { get; set; } = "";
-        public String MesCaducidad { get; set; } = "";
-        public String AnioCaducidad { get; set; } = "";
-        public String CVV { get; set; } = "";
+        public int MesCaducidad { get; set; } = 0;
+        public int AnioCaducidad { get; set; } = 0;
+        public int CVV { get; set; } = 0;
         #endregion
         #endregion
     }

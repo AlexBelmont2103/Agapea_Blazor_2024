@@ -19,6 +19,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         #region metodos para zonaPedido
         Task<List<Provincia>> RecuperarProvincias();
         Task<List<Municipio>> RecuperarMunicipios(String cpro);
+        Task<String> FinalizarPedido(DatosPago datos, Pedido pedido);
         #endregion
     }
 }

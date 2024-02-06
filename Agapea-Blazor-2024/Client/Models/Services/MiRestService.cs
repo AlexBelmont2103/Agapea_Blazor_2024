@@ -1,6 +1,7 @@
 ﻿using Agapea_Blazor_2024.Client.Models.Services.Interfaces;
 using Agapea_Blazor_2024.Shared;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace Agapea_Blazor_2024.Client.Models.Services
 {
@@ -77,6 +78,17 @@ namespace Agapea_Blazor_2024.Client.Models.Services
                 return new List<Municipio>();
             }
 
+        }
+
+        public async Task<String> FinalizarPedido(DatosPago datos, Pedido pedido)
+        {
+            Dictionary<string, string> _dic = new Dictionary<string, string>()
+            {
+                { "datosPago", JsonSerializer.Serialize(datos) },
+                { "pedido", JsonSerializer.Serialize(pedido) }
+            };
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Dictionary<string, string>>("/api/RESTTienda/FinalizarPedido", _dic);
+            return await _resp.Content.ReadAsStringAsync();
         }
 
         #endregion

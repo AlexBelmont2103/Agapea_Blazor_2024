@@ -43,7 +43,7 @@
             <div class="row">
                 <div class="col-6">
                     <label for="inputPais" class="form-label">Pais</label>
-                    <InputText @bind-Value="Model.DireccionEnvio.Pais" type="text" class="form-control" id="inputPais" placeholder="España" name="pais" />
+                    <input  type="text" class="form-control" id="inputPais" placeholder="España" name="pais" />
                 </div>
                 <div class="col-6">
                     <label for="inputProvincia" class="form-label">Provincia*</label>
@@ -159,9 +159,8 @@
     [CascadingParameter(Name = "listaProvincias")]
     public List<Provincia> listaProvincias { get; set; }
 
-
-    [Parameter]
-    public DatosPago Model { get; set;}
+    [CascadingParameter(Name = "formPedidoEditContext")]
+    public EditContext formPedidoEditContext { get; set; }
 
     [Parameter]
     public EventCallback<bool> ShowDatosFacturaEvent { get; set; } = new EventCallback<bool>();
@@ -169,9 +168,17 @@
     private bool checkdirppalenvio { get; set; } = true;
     private bool checkclienteloggedenvio { get; set; } = true;
     private bool isDisabled { get; set; } = true;
+    private DatosPago _datosPago;
 
     private List<Municipio> listaMunicipios { get; set; } = new List<Municipio>();
     private Direccion direccionprincipal;
+    private string provinciaSelect { get; set; }= "-1";
+    private string municipioSelect { get; set; } = "-1";
+
+    protected override void OnInitialized()
+    {
+        this._datosPago = this.formPedidoEditContext.Model as DatosPago;
+    }
 
 
     protected override void OnParametersSet()
@@ -181,8 +188,8 @@
 
     private async Task OnChangeProvincia(ChangeEventArgs ev)
     {
-        String[] datosprov = ev.Value.ToString().Split('-');
-        this.listaMunicipios = await this.restSvc.RecuperarMunicipios(datosprov[0]);
+        this.provinciaSelect = ev.Value.ToString();
+        this.listaMunicipios = await this.restSvc.RecuperarMunicipios(this.provinciaSelect.Split(municipioSelect'-')[0]);
         if (this.listaMunicipios.Count > 0)
         {
             this.isDisabled = false;

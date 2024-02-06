@@ -4,28 +4,33 @@
 @inject IStorageService storageSvc
 @inject NavigationManager navigate
 @inject IRestService restSvc
+@inject JSRuntime JSRuntime
 
 <div class="container">
     <div class="row">
         <!-- columna para datos del pedido: direccion envio, facturacion, datos pago-->
         <div class="col-7">
-            <CascadingValue Name="clienteLogged" Value="clienteLogged">
-                <CascadingValue Name="listaProvincias" Value="listaProvincias">
-                    <EditForm Model="@datosPago" OnSubmit="HandleSubmit">
+            <EditForm EditContext="this.formPedidoEditContext" OnValidSubmit="FinalizarPedido">
+                <CascadingValue Name="formPedidoEditContext" Value="formPedidoEditContext" >
+                <CascadingValue Name="clienteLogged" Value="clienteLogged">
+                    <CascadingValue Name="listaProvincias" Value="listaProvincias">
+
                         <DatosEntregaPedido Model="@datosPago" ShowDatosFacturaEvent="@((valor)=>{ this.ShowDatosFacturaPedido=valor; })"></DatosEntregaPedido>
                         @if (this.ShowDatosFacturaPedido)
                         {
                             <DatosFacturacionPedido Model="@datosPago"></DatosFacturacionPedido>
                         }
                         <DatosPagoPedido Model="@datosPago" tituloPago="@(this.ShowDatosFacturaPedido==true ? "3. - Pago" : "2. - Pago")"></DatosPagoPedido>
-                    </EditForm>
+
+                    </CascadingValue>
                 </CascadingValue>
-            </CascadingValue>
-            <div class="d-flex flex-row justify-content-center mt-3">
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="fa-solid fa-truck-fast"></i>  Finalizar Pedido
-                </button>
-            </div>
+                </CascadingValue>
+                <div class="d-flex flex-row justify-content-center mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-truck-fast"></i>  Finalizar Pedido
+                    </button>
+                </div>
+            </EditForm>
         </div>
 
         <!-- columna para elementos del pedido, subtotal, gastos envio y total -->
@@ -85,6 +90,7 @@
     public Cliente clienteLogged { get; set; }
     public List<Provincia> listaProvincias { get; set; }
     private bool ShowDatosFacturaPedido { get; set; } = false;
+    public EditContext formPedidoEditContext { get; set; }
     public DatosPago? datosPago;
     public Decimal Subtotal { get; set; }
     public Decimal GastosEnvio { get; set; } = 0;
@@ -98,8 +104,8 @@
         this.listaProvincias = await this.restSvc.RecuperarProvincias();
         this.datosPago = new DatosPago();
         this.Subtotal = CalcularSubtotal();
-        this.GastosEnvio = CalcularGastosEnvio();
         this.Total = CalcularTotal();
+        this.formPedidoEditContext = new EditContext(this.datosPago);
     }
 
     public void ModificarItemPedido(KeyValuePair<String, ItemPedido> datos)
@@ -119,29 +125,10 @@
         }
         return subtotal;
     }
-    private Decimal CalcularGastosEnvio()
-    {
-        //Comparamos el CPRO de la provincia de envio
-        //Si el CPRO es 35, 38, 51, o 52, los gastos de envío son 5
-        //El resto, son 2
-        Decimal gastosEnvio = 0;
-        String codpro = this.datosPago.DireccionEnvio.ProvinciaDirec.CPRO;
-        if(codpro == "35" || codpro == "32" || codpro=="51"||codpro == "52")
-        {
-            gastosEnvio = 5;
-        }
-        else
-        {
-            gastosEnvio = 2;
-        }
-
-        return gastosEnvio;
-    }
     private Decimal CalcularTotal()
     {
         return this.Subtotal + this.GastosEnvio;
     }
-
     private void HandleSubmit()
     {
         //Hacemos preventDefault para evitar que se recargue la página
@@ -149,8 +136,5 @@
         //Mostramos el formulario por consola
         Console.WriteLine("Formulario enviado");
         Console.WriteLine(datosPago);
-        pedido = new Pedido(){
-            
-        };}
     }
 }
