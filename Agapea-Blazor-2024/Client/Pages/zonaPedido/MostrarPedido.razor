@@ -89,6 +89,7 @@
     public Decimal Subtotal { get; set; }
     public Decimal GastosEnvio { get; set; } = 0;
     public Decimal Total { get; set; }
+    public Pedido pedido { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -97,7 +98,8 @@
         this.listaProvincias = await this.restSvc.RecuperarProvincias();
         this.datosPago = new DatosPago();
         this.Subtotal = CalcularSubtotal();
-        this.Total=CalcularTotal();
+        this.GastosEnvio = CalcularGastosEnvio();
+        this.Total = CalcularTotal();
     }
 
     public void ModificarItemPedido(KeyValuePair<String, ItemPedido> datos)
@@ -117,10 +119,29 @@
         }
         return subtotal;
     }
+    private Decimal CalcularGastosEnvio()
+    {
+        //Comparamos el CPRO de la provincia de envio
+        //Si el CPRO es 35, 38, 51, o 52, los gastos de envío son 5
+        //El resto, son 2
+        Decimal gastosEnvio = 0;
+        String codpro = this.datosPago.DireccionEnvio.ProvinciaDirec.CPRO;
+        if(codpro == "35" || codpro == "32" || codpro=="51"||codpro == "52")
+        {
+            gastosEnvio = 5;
+        }
+        else
+        {
+            gastosEnvio = 2;
+        }
+
+        return gastosEnvio;
+    }
     private Decimal CalcularTotal()
     {
         return this.Subtotal + this.GastosEnvio;
     }
+
     private void HandleSubmit()
     {
         //Hacemos preventDefault para evitar que se recargue la página
@@ -128,5 +149,8 @@
         //Mostramos el formulario por consola
         Console.WriteLine("Formulario enviado");
         Console.WriteLine(datosPago);
+        pedido = new Pedido(){
+            
+        };}
     }
 }
