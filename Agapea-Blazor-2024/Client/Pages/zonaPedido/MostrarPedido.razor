@@ -4,7 +4,7 @@
 @inject IStorageService storageSvc
 @inject NavigationManager navigate
 @inject IRestService restSvc
-@inject JSRuntime JSRuntime
+@inject IJSRuntime JSRuntime
 
 <div class="container">
     <div class="row">
@@ -15,12 +15,12 @@
                     <CascadingValue Name="clienteLogged" Value="clienteLogged">
                         <CascadingValue Name="listaProvincias" Value="listaProvincias">
 
-                            <DatosEntregaPedido Model="@datosPago" ShowDatosFacturaEvent="@((valor)=>{ this.ShowDatosFacturaPedido=valor; })"></DatosEntregaPedido>
+                            <DatosEntregaPedido ShowDatosFacturaEvent="@((valor)=>{ this.ShowDatosFacturaPedido=valor; })" operarGastosEnvioEvent="@ModificarGastosEnvio"></DatosEntregaPedido>
                             @if (this.ShowDatosFacturaPedido)
                             {
-                                <DatosFacturacionPedido Model="@datosPago"></DatosFacturacionPedido>
+                                <DatosFacturacionPedido></DatosFacturacionPedido>
                             }
-                            <DatosPagoPedido Model="@datosPago" tituloPago="@(this.ShowDatosFacturaPedido==true ? "3. - Pago" : "2. - Pago")"></DatosPagoPedido>
+                            <DatosPagoPedido tituloPago="@(this.ShowDatosFacturaPedido==true ? "3. - Pago" : "2. - Pago")"></DatosPagoPedido>
 
                         </CascadingValue>
                     </CascadingValue>
@@ -116,6 +116,11 @@
         this.Total = CalcularSubtotal();
         StateHasChanged();
     }
+    public void ModificarGastosEnvio(String codPro)
+    {
+        //Recibimos el codPro del componente "DatosEntregaPedido"
+        CalcularGastosEnvio(codPro);
+    }
     private Decimal CalcularSubtotal()
     {
         Decimal subtotal = 0;
@@ -125,16 +130,52 @@
         }
         return subtotal;
     }
+    private void CalcularGastosEnvio(String codPro)
+    {
+
+        Decimal gastosEnvio = 0;
+        //Si el codPro es 35, 38, 51, o 52, los gastos de envio son 5. Si no, son 2
+        if (codPro == "35" || codPro == "38" || codPro == "51" || codPro == "52")
+        {
+            gastosEnvio = 5;
+        }
+        else
+        {
+            gastosEnvio = 2;
+        }
+        this.GastosEnvio = gastosEnvio;
+        this.Total = CalcularTotal();
+    }
     private Decimal CalcularTotal()
     {
         return this.Subtotal + this.GastosEnvio;
     }
-    private void FinalizarPedido()
+    private async Task FinalizarPedido()
     {
         //Hacemos preventDefault para evitar que se recargue la página
 
         //Mostramos el formulario por consola
-        Console.WriteLine("Formulario enviado");
-        Console.WriteLine(datosPago);
+
+        if (datosPago != null)
+        {
+            Console.WriteLine("Formulario enviado");
+            //Construimos el pedido con el objeto datoPago
+            this.pedido = new Pedido();
+            this.pedido.ElementosPedido = this._listaItems;
+            this.pedido.DireccionEnvio = this.datosPago.DireccionEnvio;
+            this.pedido.DireccionFacturacion = this.datosPago.DireccionFactura;
+            this.pedido.SubTotal = this.Subtotal;
+            this.pedido.GastosEnvio = this.GastosEnvio;
+            this.pedido.Total = this.Total;
+            this.pedido.EstadoPedido = "Pendiente";
+            string resp = await this.restSvc.FinalizarPedido(this.datosPago, this.pedido);
+            Console.WriteLine(resp);
+        }
+
+        else
+        {
+            Console.WriteLine("No se ha enviado el formulario");
+        }
+
     }
 }

@@ -8,5 +8,13 @@
         public String PRO { get; set; } = "";
 
         #endregion
+        #region ....métodos de clase Provincia....
+        public String ToString()
+        {
+            return $"CCOM: {CCOM}\n" +
+                $"CPRO: {CPRO}\n" +
+                $"PRO: {PRO}";
+        }
+        #endregion
     }
 }

@@ -2,6 +2,7 @@
 using Agapea_Blazor_2024.Shared;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace Agapea_Blazor_2024.Server.Controllers
@@ -12,10 +13,13 @@ namespace Agapea_Blazor_2024.Server.Controllers
     {
         #region propiedades de la clase RESTTiendaController
         private AplicacionDBContext _dbContext;
+        private IConfiguration __iconfig;
+        private static readonly HttpClient cliente = new HttpClient(); //Para hacer llamadas a servicios API REST como PAYPAL
         #endregion
-        public RESTTiendaController(AplicacionDBContext _dbContext)
+        public RESTTiendaController(AplicacionDBContext _dbContext, IConfiguration iconfig)
         {
             this._dbContext = _dbContext;
+            this.__iconfig = iconfig;
         }
         #region ...metodos de la clase RESTTiendaController
 
@@ -128,18 +132,116 @@ namespace Agapea_Blazor_2024.Server.Controllers
             }
         }
         [HttpPost]
-        public String FinalizarPedido([FromBody] Dictionary<string, string> dic)
+        public async Task<String> FinalizarPedido([FromBody] Dictionary<string, string> dic)
         {
             try
             {
                 DatosPago datosPago = JsonSerializer.Deserialize<DatosPago>(dic["datosPago"]);
                 Pedido pedido = JsonSerializer.Deserialize<Pedido>(dic["pedido"]);
-                return "Pedido finalizado con exito";
+                bool bandera = await PagoStripeNoAPI(datosPago, pedido);
+                if (bandera)
+                {
+                    return "Pedido finalizado con exito";
+                }
+                else
+                {
+                    return "Pedido no finalizado con exito";
+                }
+
             }
             catch (Exception ex)
             {
-                return "";
+                return "Hubo algún problema al finalizar el pedido";
             }
+        }
+        #endregion
+        #region ///METODOS PRIVADOS ///
+        private async Task<bool> PagoStripeNoAPI(DatosPago datos, Pedido pedido)
+        {
+            bool bandera = false;
+            try
+            {
+                //1º Crear un objeto customer via api-rest de stripe
+                string _claveStripe = this.__iconfig["StripeCredentials:ClaveAPI"];
+                string _claveSecreta = this.__iconfig["StripeCredentials:ClaveSecreta"];
+
+                //Datos a la peticion rest tienen que ir estilo formulario x-www-form-urlencoded
+                //variable=valor variable=valor variable=valor
+                Dictionary<string, string> customerStripeValues = new Dictionary<string, string>()
+            {
+                {"name",datos.NombreEnvio+" "+datos.ApellidosEnvio },
+                {"email", datos.EmailEnvio },
+                {"phone", datos.TelefonoEnvio },
+                {"address[city]", datos.DireccionEnvio.MunicipioDirec.DMUN50 },
+                {"address[country]", datos.DireccionEnvio.Pais },
+                {"address[line1]", datos.DireccionEnvio.Calle },
+                {"address[postal_code]", datos.DireccionEnvio.CP.ToString() },
+                {"address[state]", datos.DireccionEnvio.ProvinciaDirec.PRO}
+            };
+                HttpRequestMessage _request = new HttpRequestMessage(HttpMethod.Post, "https://api.stripe.com/v1/customers");
+                _request.Headers.Add("Authorization", $"Bearer {_claveSecreta}");
+                _request.Content = new FormUrlEncodedContent(customerStripeValues);
+
+                HttpResponseMessage _response = await cliente.SendAsync(_request);
+                if (_response.IsSuccessStatusCode)
+                {
+                    //Crear card asociada al customer-id que me devuelve stripe
+                    //Deserializar objeto _response sin usar clases
+                    //Recuperar la propiedad id del objeto deserializado utiliando jsondom
+                    string _contenidorespuesta = await _response.Content.ReadAsStringAsync();
+                    JsonNode _contenidorespuestaDeserializado = JsonNode.Parse(_contenidorespuesta);
+                    string _idCustomer = _contenidorespuestaDeserializado["id"].ToString();
+                    //Crear card asociada al customer-id que me devuelve stripe
+                    Dictionary<string, string> cardStripeValues = new Dictionary<string, string>()
+                {
+                    {"source","tok_visa_debit" }
+                };
+                    HttpRequestMessage _requestCard = new HttpRequestMessage(HttpMethod.Post, $"https://api.stripe.com/v1/customers/{_idCustomer}/sources");
+                    _requestCard.Headers.Add("Authorization", $"Bearer {_claveSecreta}");
+                    _requestCard.Content = new FormUrlEncodedContent(cardStripeValues);
+
+                    HttpResponseMessage _responseCard = await cliente.SendAsync(_requestCard);
+                    if (_responseCard.IsSuccessStatusCode)
+                    {
+                        //Crear un charge con el customer id y el card id
+                        string _contenidorespuestaCard = await _responseCard.Content.ReadAsStringAsync();
+                        JsonNode _contenidorespuestaCardDeserializado = JsonNode.Parse(_contenidorespuestaCard);
+                        string _idCard = _contenidorespuestaCardDeserializado["id"].ToString();
+                        Dictionary<string, string> chargeStripeValues = new Dictionary<string, string>()
+                        {
+                            {"amount",((int)(pedido.Total*100)).ToString() },
+                            {"currency","eur" },
+                            {"description",pedido.IdPedido },
+                            {"customer",_idCustomer },
+                            {"source",_idCard }
+                        };
+                        HttpRequestMessage _requestCharge = new HttpRequestMessage(HttpMethod.Post, "https://api.stripe.com/v1/charges");
+                        _requestCharge.Headers.Add("Authorization", $"Bearer {_claveSecreta}");
+                        _requestCharge.Content = new FormUrlEncodedContent(chargeStripeValues);
+
+                        HttpResponseMessage _responseCharge = await cliente.SendAsync(_requestCharge);
+
+                        if (_responseCharge.IsSuccessStatusCode)
+                        {
+                            //Leer propiedad status de la respuesta y comprobar que es "succeeded"
+                            string _contenidorespuestaCharge = await _responseCharge.Content.ReadAsStringAsync();
+                            JsonNode _contenidorespuestaChargeDeserializado = JsonNode.Parse(_contenidorespuestaCharge);
+                            string _status = _contenidorespuestaChargeDeserializado["status"].ToString();
+                            if (_status == "succeeded")
+                            {
+                                bandera = true;
+                            }
+                        }
+                    }
+
+                }
+                return bandera;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
         }
         #endregion
     }

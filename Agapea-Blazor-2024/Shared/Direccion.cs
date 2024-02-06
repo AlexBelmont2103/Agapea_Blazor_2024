@@ -12,5 +12,17 @@
         public Boolean EsPrincipal { get; set; } = false;
         public Boolean EsFacturacion { get; set; } = false;
         #endregion
+        #region ...métodos clase direccion...
+        public String ToString()
+        {
+            return $"Calle: {Calle}\n" +
+                $"Código postal: {CP}\n" +
+                $"Provincia: {ProvinciaDirec.ToString()}\n" +
+                $"Municipio: {MunicipioDirec.ToString()}\n" +
+                $"País: {Pais}\n" +
+                $"Es principal: {EsPrincipal}\n" +
+                $"Es de facturación: {EsFacturacion}";
+        }
+        #endregion
     }
 }

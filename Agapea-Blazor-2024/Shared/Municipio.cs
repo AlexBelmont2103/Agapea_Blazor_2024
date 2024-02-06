@@ -9,5 +9,14 @@
         public String DMUN50 { get; set; } = "";
 
         #endregion
+        #region ...métodos de clase Municipio...
+        public String ToString()
+        {
+            return $"CPRO: {CPRO}\n" +
+                $"CMUM: {CMUM}\n" +
+                $"CUN: {CUN}\n" +
+                $"DMUN50: {DMUN50}";
+        }
+        #endregion
     }
 }

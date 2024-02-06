@@ -1,4 +1,8 @@
-﻿<div class="row" id="filafacturacontainer">
+﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inject IRestService restSvc
+@inject IJSRuntime JSRuntime
+
+<div class="row" id="filafacturacontainer">
     <div class="container" id="facturacontainer">
 
         <div class="row mt-4">
@@ -8,7 +12,7 @@
         <div class="row">
             <div class="col-6">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="tipofactura" id="datosfacturaempresa" checked value="facturaempresa" onchange="@(()=>{ Console.WriteLine(this.checkempresa); this.checkempresa=true; })" />
+                    <input class="form-check-input" type="radio" name="tipofactura" id="datosfacturaempresa" checked value="facturaempresa" onchange="@(()=>{ Console.WriteLine(this.checkempresa); this.checkempresa=true; this._datosPago.TipoFactura="empresa" ;})" />
                     <label class="form-check-label" for="datosfacturaempresa">
                         Empresa
                     </label>
@@ -16,7 +20,7 @@
             </div>
             <div class="col-6">
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="tipofactura" id="datosfacturaparticular" value="facturaparticular" onchange="@(()=> { Console.WriteLine(this.checkempresa); this.checkempresa=false; })" />
+                    <input class="form-check-input" type="radio" name="tipofactura" id="datosfacturaparticular" value="facturaparticular" onchange="@(()=> { Console.WriteLine(this.checkempresa); this.checkempresa=false; this._datosPago.TipoFactura="particular" ;})" />
                     <label class="form-check-label" for="datosfacturaparticular">
                         Profesional, particular o autononmo
                     </label>
@@ -27,11 +31,11 @@
         <div class="row">
             <div class="col-6">
                 <label for="nombreFactura" class="form-label">@(this.checkempresa ? "Nombre de la empresa" : "Apellidos y Nombre") </label>
-                <input type="text" class="form-control" id="nombreFactura" name="nombreFactura" />
+                <input type="text" class="form-control" id="nombreFactura" name="nombreFactura" @bind="this._datosPago.nombreFactura" />
             </div>
             <div class="col-6">
                 <label for="docFactura" class="form-label">@(this.checkempresa ? "CIF" : "NIF")</label>
-                <input type="text" class="form-control" id="docFactura" name="docFactura" />
+                <input type="text" class="form-control" id="docFactura" name="docFactura" @bind="this._datosPago.DocFiscalFactura" />
             </div>
         </div>
 
@@ -39,7 +43,7 @@
         <div class="row">
             <div class="col">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="checkdireccionfactura" checked onchange="@(()=> { this.checkmismadirecfactura = ! this.checkmismadirecfactura; })" />
+                    <input class="form-check-input" type="checkbox" value="" id="checkdireccionfactura" checked onchange="@onChangeMismaDireccion" />
                     <label class="form-check-label" for="checkdireccionfactura">
                         Direccion de facturacion igual que la de envio
                     </label>
@@ -55,11 +59,11 @@
                     <div class="row">
                         <div class="col-6">
                             <label for="inputPaisFactura" class="form-label">Pais</label>
-                            <input type="text" class="form-control" id="inputPaisFactura" placeholder="España" name="paisfactura" />
+                            <input type="text" class="form-control" id="inputPaisFactura" placeholder="España" name="paisfactura" @bind="this._datosPago.DireccionFactura.Pais" />
                         </div>
                         <div class="col-6">
                             <label for="inputProvinciaFactura" class="form-label">Provincia*</label>
-                            <select id="inputProvinciaFactura" class="form-select" name="provinciafactura">
+                            <select id="inputProvinciaFactura" class="form-select" name="provinciafactura" @bind="this.provinciaSelect">
                                 <option value="-1" defaultValue={true}> - Seleccionar Provincia - </option>
                                 @foreach (Provincia unaprov in this.listaProvincias)
                                 {
@@ -71,19 +75,23 @@
                     <div class='row'>
                         <div class="col-6">
                             <label for="inputCalleFactura" class="form-label">Direccion completa*</label>
-                            <input type="text" class="form-control" id="inputCalleFactura" placeholder="Mi Direccion" name="callefactura" />
+                            <input type="text" class="form-control" id="inputCalleFactura" placeholder="Mi Direccion" name="callefactura" @bind="this._datosPago.DireccionFactura.Calle" />
                         </div>
 
                         <div class="col-2">
                             <label for="inputCPFactura" class="form-label">Codigo Postal*</label>
-                            <input type="text" class="form-control" id="inputCPFactura" placeholder="Codigo Postal: 28803" name="cpfactura" />
+                            <input type="text" class="form-control" id="inputCPFactura" placeholder="Codigo Postal: 28803" name="cpfactura" @bind="this._datosPago.DireccionFactura.CP" />
                         </div>
 
 
                         <div class="col-4">
                             <label for="inputMunicipioFactura" class="form-label">Localidad*</label>
-                            <select id="inputMunicipioFactura" class="form-select" name="municipiofactura" disabled>
+                            <select id="inputMunicipioFactura" class="form-select" name="municipiofactura" disabled="@isDisabled" @bind="this.municipioSelect">
                                 <option value="-1" defaultValue={true}> - Selecciona un Municipio -</option>
+                                @foreach (Municipio unMunicipio in this.listaMunicipios)
+                                {
+                                    <option value="@String.Concat(unMunicipio.CMUM,"-",unMunicipio.DMUN50)">@unMunicipio.DMUN50</option>
+                                }
                             </select>
                         </div>
                     </div>
@@ -96,11 +104,84 @@
 
 
 @code {
+    [CascadingParameter]
+    public EditContext formPedidoEditContext { get; set; }
     [CascadingParameter(Name = "listaProvincias")]
     public List<Provincia> listaProvincias { get; set; }
 
     [Parameter]
-    public DatosPago Model { get; set; }
+    public DatosPago _datosPago { get; set; }
     private bool checkempresa { get; set; } = true;
     private bool checkmismadirecfactura { get; set; } = true;
+    private bool isDisabled { get; set; } = true;
+
+    private string provinciaSelect { get; set; } = "-1";
+    private string municipioSelect { get; set; } = "-1";
+    private List<Municipio> listaMunicipios { get; set; } = new List<Municipio>();
+
+    protected override void OnInitialized()
+    {
+        this._datosPago = this.formPedidoEditContext.Model as DatosPago;
+    }
+
+    private async Task OnChangeProvincia(ChangeEventArgs ev)
+    {
+        this.provinciaSelect = ev.Value.ToString();
+        if (this.provinciaSelect != "-1")
+        {
+            string codprovincia = this.provinciaSelect.Split('-')[0];
+            //Modificamos la provincia del objeto datosPago
+            this._datosPago.DireccionEnvio.ProvinciaDirec = new Provincia()
+                {
+                    CCOM = "",
+                    CPRO = codprovincia,
+                    PRO = ev.Value.ToString().Split('-')[1]
+                };
+            this.listaMunicipios = await this.restSvc.RecuperarMunicipios(codprovincia);
+            this.isDisabled = false;
+
+
+        }
+
+    }
+
+    private async Task OnChangeMunicipio(ChangeEventArgs ev)
+    {
+        this.municipioSelect = ev.Value.ToString();
+        if (this.municipioSelect != "-1")
+        {
+            string codmunicipio = this.municipioSelect.Split('-')[0];
+            //Modificamos la provincia del objeto datosPago
+            this._datosPago.DireccionEnvio.MunicipioDirec = new Municipio()
+                {
+                    CUN = "",
+                    CPRO = this.provinciaSelect.Split('-')[0],
+                    CMUM = codmunicipio,
+                    DMUN50 = ev.Value.ToString().Split('-')[1]
+                };
+        }
+    }
+    private async Task onChangeMismaDireccion(ChangeEventArgs ev)
+    {
+        //Comprobamos la propiedad checked del checkbox para asignar el valor opuesto a la propiedad checkmismadirecfactura
+        Console.WriteLine(ev.Value);
+        if(ev.Value.ToString() == "True")
+        {
+            this.checkmismadirecfactura = true;
+        }
+        else
+        {
+            this.checkmismadirecfactura = false;
+        }
+        //Si el checkbox esta chequeado, copiamos los datos de envio a los de facturacion
+        if (this.checkmismadirecfactura)
+        {
+            this._datosPago.DireccionFactura = this._datosPago.DireccionEnvio;
+        }
+        else
+        {
+            this._datosPago.DireccionFactura = new Direccion();
+        }
+        
+    }
 }

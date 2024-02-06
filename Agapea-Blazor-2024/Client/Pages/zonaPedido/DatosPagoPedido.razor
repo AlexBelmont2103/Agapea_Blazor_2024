@@ -7,13 +7,13 @@
     <div class="row">
         <div class="col">
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="pagoradios" id="pagotarjeta" checked value="pagotarjeta" />
+                <input class="form-check-input" type="radio" name="pagoradios" id="pagotarjeta" checked value="pagotarjeta" @onchange="@(()=>{this._datosPago.MetodoPago="pagoTarjeta";})" />
                 <label class="form-check-label" htmlFor="pagotarjeta">
                     Pago con tarjeta
                 </label>
             </div>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="pagoradios" id="pagopaypal" value="pagopaypal" />
+                <input class="form-check-input" type="radio" name="pagoradios" id="pagopaypal" value="pagopaypal" @onchange="@(()=>{this._datosPago.MetodoPago="pagoPayPal";})" />
                 <label class="form-check-label" htmlFor="pagopaypal">
                     Pago mediante <img src="/images/paypal.gif" alt=".." />
                 </label>
@@ -30,12 +30,12 @@
             <div class="row">
                 <div class="col-5">
                     <label htmlFor="inputNumero" class="form-label">Numero de la tarjeta *</label>
-                    <input type="text" id="inputNumero" class="form-control" name="numerocard" />
+                    <input type="text" id="inputNumero" class="form-control" name="numerocard" @bind="this._datosPago.NumeroTarjeta" />
                 </div>
 
                 <div class="col-3">
                     <label class="form-label">Fecha caducidad</label>
-                    <select id="inputAnio" class="form-select" name="aniocard">
+                    <select id="inputAnio" class="form-select" name="aniocard" @bind="this._datosPago.AnioCaducidad">
                         @for (int anio = DateTime.Now.Year; anio <= DateTime.Now.Year + 10; anio++)
                         {
                             <option value="@anio">@anio</option>
@@ -44,7 +44,7 @@
                 </div>
                 <div class="col-2">
                     <label class="form-label">Año/Mes</label>
-                    <select id="inputMes" class="form-select" name="mescard">
+                    <select id="inputMes" class="form-select" name="mescard" @bind="this._datosPago.MesCaducidad">
                         @for (int mes = 1; mes <= 12; mes++)
                         {
                             <option value="@mes">@mes</option>
@@ -54,14 +54,14 @@
 
                 <div class="col-2">
                     <label htmlFor="inputCVV" class="form-label">CVV *</label>
-                    <input type="text" class="form-control" id="inputCVV" name="cvv" />
+                    <input type="text" class="form-control" id="inputCVV" name="cvv" @bind="this._datosPago.CVV"/>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col">
                     <label htmlFor="inputNombreBanco" class="form-label">Nombre del banco de la tarjeta *</label>
-                    <input type="text" class="form-control" id="inputNombreBanco" name="nombrebancocard" />
+                    <input type="text" class="form-control" id="inputNombreBanco" name="nombrebancocard" @bind="this._datosPago.NombreBanco"/>
                 </div>
             </div>
 
@@ -74,9 +74,18 @@
 
 
 @code {
+    [CascadingParameter]
+    public EditContext formPedidoEditContext { get; set; }
     [Parameter]
     public String tituloPago { get; set; }
 
-    [Parameter]
-    public DatosPago Model { get; set; }
+    public DatosPago _datosPago { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this._datosPago = this.formPedidoEditContext.Model as DatosPago;
+        this._datosPago.MetodoPago = "pagoTarjeta";
+    }
+
+
 }
