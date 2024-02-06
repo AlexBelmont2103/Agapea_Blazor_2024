@@ -11,19 +11,19 @@
         <!-- columna para datos del pedido: direccion envio, facturacion, datos pago-->
         <div class="col-7">
             <EditForm EditContext="this.formPedidoEditContext" OnValidSubmit="FinalizarPedido">
-                <CascadingValue Name="formPedidoEditContext" Value="formPedidoEditContext" >
-                <CascadingValue Name="clienteLogged" Value="clienteLogged">
-                    <CascadingValue Name="listaProvincias" Value="listaProvincias">
+                <CascadingValue Name="formPedidoEditContext" Value="formPedidoEditContext">
+                    <CascadingValue Name="clienteLogged" Value="clienteLogged">
+                        <CascadingValue Name="listaProvincias" Value="listaProvincias">
 
-                        <DatosEntregaPedido Model="@datosPago" ShowDatosFacturaEvent="@((valor)=>{ this.ShowDatosFacturaPedido=valor; })"></DatosEntregaPedido>
-                        @if (this.ShowDatosFacturaPedido)
-                        {
-                            <DatosFacturacionPedido Model="@datosPago"></DatosFacturacionPedido>
-                        }
-                        <DatosPagoPedido Model="@datosPago" tituloPago="@(this.ShowDatosFacturaPedido==true ? "3. - Pago" : "2. - Pago")"></DatosPagoPedido>
+                            <DatosEntregaPedido Model="@datosPago" ShowDatosFacturaEvent="@((valor)=>{ this.ShowDatosFacturaPedido=valor; })"></DatosEntregaPedido>
+                            @if (this.ShowDatosFacturaPedido)
+                            {
+                                <DatosFacturacionPedido Model="@datosPago"></DatosFacturacionPedido>
+                            }
+                            <DatosPagoPedido Model="@datosPago" tituloPago="@(this.ShowDatosFacturaPedido==true ? "3. - Pago" : "2. - Pago")"></DatosPagoPedido>
 
+                        </CascadingValue>
                     </CascadingValue>
-                </CascadingValue>
                 </CascadingValue>
                 <div class="d-flex flex-row justify-content-center mt-3">
                     <button type="submit" class="btn btn-primary btn-lg">
@@ -129,7 +129,7 @@
     {
         return this.Subtotal + this.GastosEnvio;
     }
-    private void HandleSubmit()
+    private void FinalizarPedido()
     {
         //Hacemos preventDefault para evitar que se recargue la página
 
