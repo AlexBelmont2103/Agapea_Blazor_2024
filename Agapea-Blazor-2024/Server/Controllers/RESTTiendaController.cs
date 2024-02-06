@@ -1,6 +1,8 @@
 ﻿using Agapea_Blazor_2024.Server.Models;
 using Agapea_Blazor_2024.Shared;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -138,9 +140,94 @@ namespace Agapea_Blazor_2024.Server.Controllers
             {
                 DatosPago datosPago = JsonSerializer.Deserialize<DatosPago>(dic["datosPago"]);
                 Pedido pedido = JsonSerializer.Deserialize<Pedido>(dic["pedido"]);
-                bool bandera = await PagoStripeNoAPI(datosPago, pedido);
-                if (bandera)
+                if(datosPago.MetodoPago=="pagoTarjeta")
                 {
+                    bool bandera = await PagoStripeNoAPI(datosPago, pedido);
+                    if (bandera)
+                    {
+                        return "Pedido finalizado con exito";
+                    }
+                    else
+                    {
+                        return "Pedido no finalizado con exito";
+                    }
+                }
+                else if(datosPago.MetodoPago=="pagoPaypal")
+                {
+                    //1º acceder a las claves de desarrollador de la api de paypal
+                    HttpRequestMessage _requestToken = new HttpRequestMessage(HttpMethod.Post, 
+                                                                              "https://api-m.sandbox.paypal.com/v1/oauth2/token");
+                    //Cabecera Authorization: Basic con las credenciales en base64
+                    //Cuerpo de la peticion en formato x-www-form-urlencoded variable: grant_type valor:client_credentials
+
+                    string _clientId = this.__iconfig["PaypalCredentials:ClientId"];
+                    string _clientSecret = this.__iconfig["PaypalCredentials:ClientSecret"];
+                    string _credenciales = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_clientSecret}"));
+                    _requestToken.Headers.Add("Authorization", $"Basic {_credenciales}");
+                    _requestToken.Content= new StringContent("grant_type=client_credentials", Encoding.UTF8, "application/x-www-form-urlencoded");
+                    HttpResponseMessage _responseToken = await cliente.SendAsync(_requestToken);
+                    if (_responseToken.IsSuccessStatusCode)
+                    {
+                        String _respJson = await _responseToken.Content.ReadAsStringAsync();
+                        JsonNode _respJsonDeserializado = JsonNode.Parse(_respJson);
+                        String _accessToken = _respJsonDeserializado["access_token"].ToString();
+                        //Token a añadir a la cabecera Authorization: Bearer para crear el order, confirmarlo y capturarlo
+
+                        //2º Crear un order via api-rest de paypal
+
+                        HttpRequestMessage _requestOrder = new HttpRequestMessage(HttpMethod.Post, "https://api-m.sandbox.paypal.com/v2/checkout/orders");
+                        _requestOrder.Headers.Add("Authorization", $"Bearer {_accessToken}");
+                        _requestOrder.Headers.Add("Content-Type", "application/json");
+                        var listaItems = pedido.ElementosPedido.Select((ItemPedido unElemento) => new
+                        {
+                            name = unElemento.LibroItem.Titulo,
+                            unit_amount = new
+                            {
+                                currency_code = "EUR",
+                                value = unElemento.LibroItem.Precio.ToString().Replace(",", ".")
+                            },
+                            quantity = unElemento.CantidadItem.ToString()
+                        }).ToList();
+                        var orderPaypal = new
+                        {
+                            intent = "CAPTURE",
+                            purchase_units = new[]
+                            {
+                                items = listaItems,
+                                new
+                                {
+                                    amount = new
+                                    {
+                                        currency_code = "EUR",
+                                        value = pedido.Total.ToString().Replace(",","."),
+                                        breakdown = new
+                                        {
+                                            shipping = new
+                                            {
+                                                currency_code = "EUR",
+                                                value = pedido.GastosEnvio.ToString().Replace(",",".")
+                                            },
+                                            item_total = new
+                                            {
+                                                currency_code = "EUR",
+                                                value = pedido.SubTotal.ToString().Replace(",",".")
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            application_context = new
+                            {
+                               return_url = "https://localhost:44300/confirmacion",
+                               cancel_url = "https://localhost:44300/cancelacion"
+                            }
+                        };
+                    }
+                    else
+                    {
+                        throw new Exception("No se ha podido obtener el token de acceso a la api de paypal");
+                    }
+
                     return "Pedido finalizado con exito";
                 }
                 else
