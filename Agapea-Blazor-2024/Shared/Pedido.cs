@@ -3,6 +3,7 @@
     public class Pedido
     {
         #region ....propiedades de clase....
+        public String IdCliente { get; set; }
         public String IdPedido { get; set; } = Guid.NewGuid().ToString();
         public DateTime FechaPedido { get; set; } = DateTime.Now;
         public List<ItemPedido> ElementosPedido { get; set; } = new List<ItemPedido>();

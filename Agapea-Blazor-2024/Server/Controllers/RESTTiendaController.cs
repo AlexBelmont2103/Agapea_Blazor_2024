@@ -140,7 +140,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
             {
                 DatosPago datosPago = JsonSerializer.Deserialize<DatosPago>(dic["datosPago"]);
                 Pedido pedido = JsonSerializer.Deserialize<Pedido>(dic["pedido"]);
-                if(datosPago.MetodoPago=="pagoTarjeta")
+                if (datosPago.MetodoPago == "pagoTarjeta")
                 {
                     bool bandera = await PagoStripeNoAPI(datosPago, pedido);
                     if (bandera)
@@ -152,19 +152,19 @@ namespace Agapea_Blazor_2024.Server.Controllers
                         return "Pedido no finalizado con exito";
                     }
                 }
-                else if(datosPago.MetodoPago=="pagoPaypal")
+                else if (datosPago.MetodoPago == "pagoPaypal")
                 {
                     //1º acceder a las claves de desarrollador de la api de paypal
-                    HttpRequestMessage _requestToken = new HttpRequestMessage(HttpMethod.Post, 
+                    HttpRequestMessage _requestToken = new HttpRequestMessage(HttpMethod.Post,
                                                                               "https://api-m.sandbox.paypal.com/v1/oauth2/token");
                     //Cabecera Authorization: Basic con las credenciales en base64
                     //Cuerpo de la peticion en formato x-www-form-urlencoded variable: grant_type valor:client_credentials
 
-                    string _clientId = this.__iconfig["PaypalCredentials:ClientId"];
-                    string _clientSecret = this.__iconfig["PaypalCredentials:ClientSecret"];
+                    string _clientId = this.__iconfig["PayPalAPIKEYS:ClientId"];
+                    string _clientSecret = this.__iconfig["PayPalAPIKEYS:ClientSecret"];
                     string _credenciales = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_clientSecret}"));
                     _requestToken.Headers.Add("Authorization", $"Basic {_credenciales}");
-                    _requestToken.Content= new StringContent("grant_type=client_credentials", Encoding.UTF8, "application/x-www-form-urlencoded");
+                    _requestToken.Content = new StringContent("grant_type=client_credentials", Encoding.UTF8, "application/x-www-form-urlencoded");
                     HttpResponseMessage _responseToken = await cliente.SendAsync(_requestToken);
                     if (_responseToken.IsSuccessStatusCode)
                     {
@@ -188,29 +188,29 @@ namespace Agapea_Blazor_2024.Server.Controllers
                             },
                             quantity = unElemento.CantidadItem.ToString()
                         }).ToList();
-                        var orderPaypal = new
+                        var order = new
                         {
                             intent = "CAPTURE",
                             purchase_units = new[]
                             {
-                                items = listaItems,
                                 new
                                 {
+                                    items = listaItems,
                                     amount = new
                                     {
                                         currency_code = "EUR",
-                                        value = pedido.Total.ToString().Replace(",","."),
+                                        value = pedido.Total.ToString().Replace(",", "."),
                                         breakdown = new
                                         {
                                             shipping = new
                                             {
                                                 currency_code = "EUR",
-                                                value = pedido.GastosEnvio.ToString().Replace(",",".")
+                                                value = pedido.GastosEnvio.ToString().Replace(",", ".")
                                             },
                                             item_total = new
                                             {
                                                 currency_code = "EUR",
-                                                value = pedido.SubTotal.ToString().Replace(",",".")
+                                                value = pedido.SubTotal.ToString().Replace(",", ".")
                                             }
                                         }
                                     }
@@ -218,8 +218,8 @@ namespace Agapea_Blazor_2024.Server.Controllers
                             },
                             application_context = new
                             {
-                               return_url = "https://localhost:44300/confirmacion",
-                               cancel_url = "https://localhost:44300/cancelacion"
+                                return_url = $"https://localhost:7262/api/RESTTienda/PaypalCallBack?idcliente={pedido.IdCliente}&idpedido={pedido.IdPedido}",
+                                cancel_url = $"https://localhost:7262/api/RESTTienda/PaypalCallBack?idcliente={pedido.IdCliente}&idpedido={pedido.IdPedido}&cancel=true"
                             }
                         };
                     }
@@ -228,18 +228,42 @@ namespace Agapea_Blazor_2024.Server.Controllers
                         throw new Exception("No se ha podido obtener el token de acceso a la api de paypal");
                     }
 
-                    return "Pedido finalizado con exito";
-                }
-                else
-                {
-                    return "Pedido no finalizado con exito";
-                }
+                        return "Pedido finalizado con exito";
+                    }
+                    else
+                    {
+                        return "Pedido no finalizado con exito";
+                    }
 
-            }
+                }
             catch (Exception ex)
             {
                 return "Hubo algún problema al finalizar el pedido";
             }
+        }
+
+        [HttpGet]
+        public async Task PayPalCallBack([FromQuery] string idcliente, [FromQuery] string idpedido, [FromQuery] Boolean cancel)
+        {
+            try
+            {
+                //1º acceder a las claves de desarrollador de la api de paypal
+                HttpRequestMessage _requestToken = new HttpRequestMessage(HttpMethod.Post,
+                                                                                         "https://api-m.sandbox.paypal.com/v1/oauth2/token");
+                //Cabecera Authorization: Basic con las credenciales en base64
+                //Cuerpo de la peticion en formato x-www-form-urlencoded variable: grant_type valor:client_credentials
+                string _clientId = this.__iconfig["PayPalAPIKEYS:ClientId"];
+                string _clientSecret = this.__iconfig["PayPalAPIKEYS:ClientSecret"];
+                string _credenciales = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_clientSecret}"));
+                _requestToken.Headers.Add("Authorization", $"Basic {_credenciales}");
+                _requestToken.Content = new StringContent("grant_type=client_credentials", Encoding.UTF8, "application/x-www-form-urlencoded");
+                HttpResponseMessage _responseToken = await cliente.SendAsync(_requestToken);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Hubo algún problema al finalizar el pedido");
+            }
+
         }
         #endregion
         #region ///METODOS PRIVADOS ///
@@ -330,6 +354,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
             }
 
         }
+
         #endregion
     }
 }
