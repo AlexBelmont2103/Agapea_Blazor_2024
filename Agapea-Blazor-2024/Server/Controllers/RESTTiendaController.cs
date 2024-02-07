@@ -1,5 +1,6 @@
 ﻿using Agapea_Blazor_2024.Server.Models;
 using Agapea_Blazor_2024.Shared;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
@@ -233,19 +234,34 @@ namespace Agapea_Blazor_2024.Server.Controllers
                     return "Pedido no finalizado con exito";
                 }
 
-            }
+                }
             catch (Exception ex)
             {
                 return "Hubo algún problema al finalizar el pedido";
             }
         }
+
         [HttpGet]
-        public async Task<String> PaypalCallBack([FromQuery] String idcliente, [FromQuery] String idpedido, [FromQuery] String cancel)
+        public async Task PayPalCallBack([FromQuery] string idcliente, [FromQuery] string idpedido, [FromQuery] Boolean cancel)
         {
-            //Vamos simplemente a recuperar el cliente y ya esta
-
-
-
+            try
+            {
+                //1º acceder a las claves de desarrollador de la api de paypal
+                HttpRequestMessage _requestToken = new HttpRequestMessage(HttpMethod.Post,
+                                                                                         "https://api-m.sandbox.paypal.com/v1/oauth2/token");
+                //Cabecera Authorization: Basic con las credenciales en base64
+                //Cuerpo de la peticion en formato x-www-form-urlencoded variable: grant_type valor:client_credentials
+                string _clientId = this.__iconfig["PayPalAPIKEYS:ClientId"];
+                string _clientSecret = this.__iconfig["PayPalAPIKEYS:ClientSecret"];
+                string _credenciales = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_clientSecret}"));
+                _requestToken.Headers.Add("Authorization", $"Basic {_credenciales}");
+                _requestToken.Content = new StringContent("grant_type=client_credentials", Encoding.UTF8, "application/x-www-form-urlencoded");
+                HttpResponseMessage _responseToken = await cliente.SendAsync(_requestToken);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Hubo algún problema al finalizar el pedido");
+            }
 
         }
         #endregion
@@ -337,6 +353,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
             }
 
         }
+
         #endregion
     }
 }

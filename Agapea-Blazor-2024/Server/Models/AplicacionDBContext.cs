@@ -27,6 +27,7 @@ namespace Agapea_Blazor_2024.Server.Models
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Provincia> Provincias { get; set; }
         public DbSet<Municipio> Municipios { get; set; }
+        public DbSet<PedidoPayPal> pedidoPayPal { get; set; }
 
 
         #endregion
@@ -50,7 +51,9 @@ namespace Agapea_Blazor_2024.Server.Models
 
             builder.Entity<MiClienteIdentity>();
             #endregion
-
+            #region /// CREACION DE TABLA PEDIDOSPAYPAL A PARTIR DE LA CLASE MODELO PEDIDOPAYPAL
+            builder.Entity<PedidoPayPal>().ToTable("PedidosPayPal");
+            #endregion
             #region /// CREACION DE TABLA DIRECCIONES A PARTIR DE LA CLASE MODELO DIRECCION ///
 
             builder.Entity<Direccion>().ToTable("Direcciones");
