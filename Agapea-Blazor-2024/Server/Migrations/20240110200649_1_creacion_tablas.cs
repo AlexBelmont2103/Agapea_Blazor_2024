@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -63,6 +62,7 @@ namespace Agapea_Blazor_2024.Server.Migrations
                 columns: table => new
                 {
                     IdDireccion = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IdCliente = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Calle = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     CP = table.Column<int>(type: "int", maxLength: 5, nullable: false),
                     Provincia = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -81,10 +81,11 @@ namespace Agapea_Blazor_2024.Server.Migrations
                 columns: table => new
                 {
                     IdPedido = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IdCliente = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FechaPedido = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ElementosPedido = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DireccionEnvio = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DireccionFacturacion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DireccionFacturacion = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SubTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     GastosEnvio = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),

@@ -4,6 +4,7 @@ using Agapea_Blazor_2024.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Agapea_Blazor_2024.Server.Migrations
 {
     [DbContext(typeof(AplicacionDBContext))]
-    partial class AplicacionDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240207214630_add_tabla_paypal")]
+    partial class add_tabla_paypal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,37 +197,6 @@ namespace Agapea_Blazor_2024.Server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.ToTable("Municipios");
-                });
-
-            modelBuilder.Entity("Agapea_Blazor_2024.Shared.Opinion", b =>
-                {
-                    b.Property<string>("IdOpinion")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Comentario")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("EsModerada")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IdCliente")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Valoracion")
-                        .HasColumnType("int");
-
-                    b.Property<string>("isbn13")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdOpinion");
-
-                    b.ToTable("Opiniones", (string)null);
                 });
 
             modelBuilder.Entity("Agapea_Blazor_2024.Shared.Pedido", b =>

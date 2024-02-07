@@ -16,12 +16,17 @@ namespace Agapea_Blazor_2024.Server.Controllers
         private UserManager<MiClienteIdentity> _userManagerService;
         private SignInManager<MiClienteIdentity> _signInManagerService;
         private IClienteCorreo _servicioCorreo;
+        private AplicacionDBContext _dbcontext;
         #endregion
-        public RESTClienteController(UserManager<MiClienteIdentity> userManagerDI, SignInManager<MiClienteIdentity> signInManagerDI, IClienteCorreo clienteEmailServiceDI)
+        public RESTClienteController(UserManager<MiClienteIdentity> userManagerDI,
+            SignInManager<MiClienteIdentity> signInManagerDI,
+            IClienteCorreo clienteEmailServiceDI,
+            AplicacionDBContext dbcontextDI)
         {
             this._userManagerService = userManagerDI;
             this._signInManagerService = signInManagerDI;
             this._servicioCorreo = clienteEmailServiceDI;
+            this._dbcontext = dbcontextDI;
         }
         #region metodos de la clase RESTClienteController
         [HttpPost]
@@ -72,7 +77,8 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 {
                     throw new Exception("Error al registrar el cliente: " + __resultRegistro.Errors.FirstOrDefault().Description);
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return new RestMessage()
                 {
@@ -85,7 +91,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
 
                 };
             }
-            
+
         }
 
         [HttpGet]
@@ -96,7 +102,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
             {
                 //3º: Usando el servicio UserManager de Identity, confirmar el token de activacion y activar la cuenta si el token es correcto
                 //Tengo que recuperar los datos del cliente identity asociados al idcliente
-                
+
                 MiClienteIdentity _clienteAActivar = await this._userManagerService.FindByIdAsync(idcliente);
 
                 IdentityResult _resultadoCompToken = await this._userManagerService.ConfirmEmailAsync(_clienteAActivar, token);
@@ -105,11 +111,71 @@ namespace Agapea_Blazor_2024.Server.Controllers
                     throw new Exception("Error al activar la cuenta de cliente: " + _resultadoCompToken.Errors.FirstOrDefault().Description);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception("Error al activar la cuenta de cliente: " + ex.Message);
             }
 
+        }
+        [HttpGet]
+        [Route("Login")]
+        public async Task<RestMessage> LoginCliente(string idcliente)
+        {
+            try
+            {
+                //Seleccionamos el cliente de la base de datos usado su id
+                MiClienteIdentity _clienteALoguear = await this._userManagerService.FindByIdAsync(idcliente);
+                //Creamos un cliente con los datos del cliente seleccionado
+                Cliente _cliente = new Cliente()
+                {
+                    Nombre = _clienteALoguear.Nombre,
+                    Apellidos = _clienteALoguear.Apellidos,
+                    Genero = _clienteALoguear.Genero,
+                    Descripcion = _clienteALoguear.Descripcion,
+                    Telefono = _clienteALoguear.PhoneNumber,
+                    Credenciales = new Cuenta()
+                    {
+                        Login = _clienteALoguear.UserName,
+                        Password = "",
+                        Email = _clienteALoguear.Email,
+                        ImagenCuentaBASE64 = _clienteALoguear.ImagenAvatarBASE64,
+                        CuentaActiva = _clienteALoguear.EmailConfirmed
+                    }
+                };
+                //Recuperamos también direcciones, pedidos, y opiniones del cliente
+                _cliente.DireccionesCliente = this._dbcontext.Direcciones.Where(d => d.IdCliente == idcliente).ToList();
+                _cliente.PedidosCliente = this._dbcontext.Pedidos.Where(p => p.IdCliente == idcliente).ToList();
+                _cliente.OpinionesCliente = this._dbcontext.Opiniones.Where(o => o.IdCliente == idcliente).ToList();
+                String _tokenSesion = await this._userManagerService.GenerateUserTokenAsync(_clienteALoguear, "Default", "tokenSesion");
+                if (_clienteALoguear == null)
+                {
+                    throw new Exception("Error al hacer login: El cliente no existe");
+                }
+                else
+                {
+                    return new RestMessage()
+                    {
+                        Codigo = 0,
+                        Mensaje = "Login correcto",
+                        Error = "",
+                        Tokensesion = _tokenSesion,
+                        DatosCliente = _cliente,
+                        OtrosDatos = null
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RestMessage()
+                {
+                    Codigo = 1,
+                    Mensaje = "Error al hacer login: " + ex.Message,
+                    Error = ex.Message,
+                    Tokensesion = null,
+                    DatosCliente = null,
+                    OtrosDatos = null
+                };
+            }
         }
 
         [HttpPost]
@@ -156,7 +222,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                     OtrosDatos = null
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new RestMessage()
                 {

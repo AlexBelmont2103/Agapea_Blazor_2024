@@ -4,7 +4,6 @@
     {
         #region ....propiedades clase opinion...
         public String IdCliente { get; set; } = "";
-        public Cliente cliente { get; set; }
         public String IdOpinion { get; set; } = Guid.NewGuid().ToString();
         public String isbn13 { get; set; } = "";
         public String Comentario { get; set; } = "";

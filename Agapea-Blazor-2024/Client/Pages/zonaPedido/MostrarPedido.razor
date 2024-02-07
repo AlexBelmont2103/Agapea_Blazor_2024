@@ -1,4 +1,9 @@
 ﻿@page "/Tienda/MostrarPedido"
+@*
+    si en la url vienen dos parametros en la querystring, el primero es el idPedido y el segundo el idCliente
+    esto significa que el pedido no ha sido finalizado, tengo que recuperar datos del pedido, del cliente y volver a pintar la vista
+    mostrando mensaje de error "FALLO EN PAGO CON PAYPAL, INTENTELO DE NUEVO O SELECCIONE OTRO METODO DE PAGO"
+*@
 @using Agapea_Blazor_2024.Client.Models.Services.Interfaces
 
 @inject IStorageService storageSvc
@@ -86,6 +91,15 @@
 
 
 @code {
+    //Parametros opcionales de la querystring
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "idcliente")]
+    public String idCliente { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "idpedido")]
+    public String idPedido { get; set; }
+
     public List<ItemPedido> _listaItems { get; set; } = new List<ItemPedido>();
     public Cliente clienteLogged { get; set; }
     public List<Provincia> listaProvincias { get; set; }

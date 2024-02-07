@@ -28,7 +28,7 @@ namespace Agapea_Blazor_2024.Server.Models
         public DbSet<Provincia> Provincias { get; set; }
         public DbSet<Municipio> Municipios { get; set; }
         public DbSet<PedidoPayPal> pedidoPayPal { get; set; }
-
+        public DbSet<Opinion> Opiniones { get; set; }
 
         #endregion
 
@@ -53,6 +53,7 @@ namespace Agapea_Blazor_2024.Server.Models
             #endregion
             #region /// CREACION DE TABLA PEDIDOSPAYPAL A PARTIR DE LA CLASE MODELO PEDIDOPAYPAL
             builder.Entity<PedidoPayPal>().ToTable("PedidosPayPal");
+            builder.Entity<PedidoPayPal>().HasKey((PedidoPayPal ped) => ped.IdPedido);
             #endregion
             #region /// CREACION DE TABLA DIRECCIONES A PARTIR DE LA CLASE MODELO DIRECCION ///
 
@@ -120,9 +121,9 @@ namespace Agapea_Blazor_2024.Server.Models
             //Serializamos la propiedad DireccionFacturacion de la clase Pedido para poder almacenarla en una columna de la tabla Pedidos
             builder.Entity<Pedido>().Property((Pedido ped) => ped.DireccionFacturacion)
                 .HasConversion(
-                 dir => JsonSerializer.Serialize<Direccion>(dir, (JsonSerializerOptions)null),
-                 dir => JsonSerializer.Deserialize<Direccion>(dir, (JsonSerializerOptions)null)
-                          ).HasColumnName("DireccionFacturacion");
+                    dir => dir != null ? JsonSerializer.Serialize<Direccion>(dir, (JsonSerializerOptions)null) : null,
+                    dir => dir != null ? JsonSerializer.Deserialize<Direccion>(dir, (JsonSerializerOptions)null) : null
+                ).HasColumnName("DireccionFacturacion");
             builder.Entity<Pedido>().Property((Pedido ped) => ped.SubTotal).IsRequired();
             builder.Entity<Pedido>().Property((Pedido ped) => ped.GastosEnvio).IsRequired();
             builder.Entity<Pedido>().Property((Pedido ped) => ped.Total).IsRequired();
@@ -137,6 +138,10 @@ namespace Agapea_Blazor_2024.Server.Models
             #endregion
             #region /// CREACION DE TABLA MUNICIPIOS A PARTIR DE LA CLASE MODELO MUNICIPIO
             builder.Entity<Municipio>().HasNoKey();
+            #endregion
+            #region /// CREACION DE LA TABLA OPINION A PARTIR DE LA CLASE MODELO OPINION
+            builder.Entity<Opinion>().ToTable("Opiniones");
+            builder.Entity<Opinion>().HasKey((Opinion op) => op.IdOpinion);
             #endregion
         }
         #endregion

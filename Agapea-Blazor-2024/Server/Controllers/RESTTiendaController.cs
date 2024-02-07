@@ -1,6 +1,5 @@
 ﻿using Agapea_Blazor_2024.Server.Models;
 using Agapea_Blazor_2024.Shared;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
@@ -140,6 +139,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
             {
                 DatosPago datosPago = JsonSerializer.Deserialize<DatosPago>(dic["datosPago"]);
                 Pedido pedido = JsonSerializer.Deserialize<Pedido>(dic["pedido"]);
+
                 if (datosPago.MetodoPago == "pagoTarjeta")
                 {
                     bool bandera = await PagoStripeNoAPI(datosPago, pedido);
@@ -219,6 +219,10 @@ namespace Agapea_Blazor_2024.Server.Controllers
                             //del array de links, el que contiene approve para mandarselo al cliente blazor para que le redireccione a la pagina de paypal
                             String _idOrder = _respOrderJsonDeserializado["id"].ToString();
                             String _linkApprove = _respOrderJsonDeserializado["links"].AsArray().Where((JsonNode unLink) => unLink["rel"].ToString() == "approve").Select((JsonNode unLink) => unLink["href"].ToString()).Single<String>();
+                            //Guardamos el pedido en la tabla pedidos
+                            this._dbContext.Pedidos.Add(pedido);
+                            this._dbContext.pedidoPayPal.Add(new PedidoPayPal() { IdCliente = pedido.IdCliente, IdPedido = pedido.IdPedido, OrderId = _idOrder });
+                            await this._dbContext.SaveChangesAsync();
                             return _linkApprove;
                         }
                     }
@@ -234,7 +238,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                     return "Pedido no finalizado con exito";
                 }
 
-                }
+            }
             catch (Exception ex)
             {
                 return "Hubo algún problema al finalizar el pedido";
@@ -242,11 +246,12 @@ namespace Agapea_Blazor_2024.Server.Controllers
         }
 
         [HttpGet]
-        public async Task PayPalCallBack([FromQuery] string idcliente, [FromQuery] string idpedido, [FromQuery] Boolean cancel)
+        public async Task<IActionResult> PayPalCallBack([FromQuery] string idcliente, [FromQuery] string idpedido, [FromQuery] Boolean cancel)
         {
             try
             {
                 //1º acceder a las claves de desarrollador de la api de paypal
+
                 HttpRequestMessage _requestToken = new HttpRequestMessage(HttpMethod.Post,
                                                                                          "https://api-m.sandbox.paypal.com/v1/oauth2/token");
                 //Cabecera Authorization: Basic con las credenciales en base64
@@ -257,10 +262,52 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 _requestToken.Headers.Add("Authorization", $"Basic {_credenciales}");
                 _requestToken.Content = new StringContent("grant_type=client_credentials", Encoding.UTF8, "application/x-www-form-urlencoded");
                 HttpResponseMessage _responseToken = await cliente.SendAsync(_requestToken);
+                if (_responseToken.IsSuccessStatusCode)
+                {
+                    String _respJson = await _responseToken.Content.ReadAsStringAsync();
+                    JsonNode _respJsonDeserializado = JsonNode.Parse(_respJson);
+                    String _accessToken = _respJsonDeserializado["access_token"].ToString();
+
+                    //2º para finalizar el pago tengo que capturar la aprobacion por parte del cliente
+                    //Cabecera Authorization: Bearer con el token de acceso
+                    //En url el parametro orderid
+                    String _orderId = this._dbContext.pedidoPayPal.Where((PedidoPayPal unPedidoPayPal) => unPedidoPayPal.IdCliente == idcliente && unPedidoPayPal.IdPedido == idpedido)
+                                                                  .Select((PedidoPayPal ppp) => ppp.OrderId).Single<String>();
+                    HttpRequestMessage _requestCapture = new HttpRequestMessage(HttpMethod.Post, $"https://api-m.sandbox.paypal.com/v2/checkout/orders/{_orderId}/capture");
+                    _requestCapture.Headers.Add("Authorization", $"Bearer {_accessToken}");
+                    HttpResponseMessage _responseCapture = await cliente.SendAsync(_requestCapture);
+                    if (_responseCapture.IsSuccessStatusCode)
+                    {
+                        String _respCaptureJson = await _responseCapture.Content.ReadAsStringAsync();
+                        JsonNode _respCaptureJsonDeserializado = JsonNode.Parse(_respCaptureJson);
+                        String _status = _respCaptureJsonDeserializado["status"].ToString();
+                        if (_status == "APPROVED" || _status == "COMPLETED")
+                        {
+                            //Actualizar el pedido en la tabla pedidos
+                            Pedido _pedido = this._dbContext.Pedidos.Where((Pedido p) => p.IdCliente == idcliente && p.IdPedido == idpedido).Single<Pedido>();
+                            _pedido.EstadoPedido = "En preparación";
+                            await this._dbContext.SaveChangesAsync();
+                            return Redirect($"https://localhost:7286/Tienda/PedidoFinalizadoOk?idpedido={idpedido}&idcliente={idcliente}");
+                        }
+                        else
+                        {
+                            throw new Exception("No se ha podido capturar el pago");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("No se ha podido capturar el pago");
+                    }
+
+                }
+                else
+                {
+                    throw new Exception("No se ha podido capturar el pago");
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception("Hubo algún problema al finalizar el pedido");
+                return Redirect($"https://localhost:7286/Tienda/MostrarPedido?idpedido={idpedido}&idcliente={idcliente}");
             }
 
         }

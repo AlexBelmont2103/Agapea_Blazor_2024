@@ -13,7 +13,7 @@
         public Decimal SubTotal { get; set; } = 0;
         public Decimal GastosEnvio { get; set; } = 2;
         public Decimal Total { get; set; } = 0;
-        public String EstadoPedido { get; set; } = "en preparacion";
+        public String EstadoPedido { get; set; } = "Pendiente de pago";
 
 
         #endregion
