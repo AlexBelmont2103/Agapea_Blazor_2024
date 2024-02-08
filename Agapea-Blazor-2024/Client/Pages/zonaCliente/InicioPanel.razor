@@ -129,7 +129,7 @@
                 </div>
 
                 <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="">
                     + Nueva Direccion
                 </button>
 
@@ -177,6 +177,12 @@
         this.operacion = "modificar";
         //Cómo abro el modal desde aqui?
         //await jsSvc.InvokeVoidAsync("$(#staticBackdrop).modal", "show");
+        this.refModal.Open();
 
+    }
+    public async Task CrearNuevaDireccion()
+    {
+        this.operacion = "crear";
+        this.refModal.direccionEd = new Direccion();
     }
 }

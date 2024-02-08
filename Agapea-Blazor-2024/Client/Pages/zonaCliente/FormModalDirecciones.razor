@@ -5,7 +5,7 @@
 
 
   
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="@modalClass" style="@this.style" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -65,7 +65,7 @@
                             <input type="hidden" id="inputOperacion" name="operacion" value="crear" />
                             <hr />
                             <div class="col-12">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="@this.Close">Cancelar</button>
                                 <button type="submit" class="btn btn-primary" id="btnCrearDireccion">@this.textButtonForm</button>
                             </div>
                         </EditForm>
@@ -84,6 +84,8 @@
     public Direccion direccionEd { get; set; } = new Direccion();
     public String textButtonForm { get; set; } = "Crear Direccion";
 
+    private string modalClass = "modal fade";
+    private string style = "display:none;";
     private bool disabledMunis { get; set; } = true;
     private String provincia { get; set; } = "0";
     private String municipio { get; set; } = "0";
@@ -109,6 +111,17 @@
     {
         this.disabledMunis = false;
         this.listamunicipios = await this.restSvc.RecuperarMunicipios(ev.Value.ToString().Split("-")[0]);
+    }
+    public void Open()
+    {
+        this.modalClass = "modal fade show";
+        this.style = "display:block;padding-right_15px;";
+    }
+
+    public void Close()
+    {
+        this.modalClass = "modal fade";
+        this.style = "display:none;";
     }
     public async Task CrearModificaDirec()
     {
