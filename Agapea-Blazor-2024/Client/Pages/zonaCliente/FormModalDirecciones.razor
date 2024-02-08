@@ -113,5 +113,18 @@
     public async Task CrearModificaDirec()
     {
         Console.WriteLine("Operacion a realizar: " + this.operacion);
+        if (this.operacion == "crear")
+        {
+            
+            Console.WriteLine("Direccion a crear");
+            Console.WriteLine(this.direccionEd.IdDireccion);
+            Console.WriteLine(this.direccionEd.Calle);
+
+        }
+        else
+        {
+            Console.WriteLine("Direccion a modificar");
+            Console.WriteLine(this.direccionEd.IdDireccion);
+        }
     }
 }
