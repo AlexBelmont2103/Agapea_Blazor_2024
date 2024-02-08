@@ -30,7 +30,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         }
         public async Task<RestMessage> LoginCliente(string idcliente)
         {
-            HttpResponseMessage _resp = await this._httpClient.GetAsync($"api/RESTCliente/LoginCliente?idcliente={idcliente}");
+            HttpResponseMessage _resp = await this._httpClient.GetAsync($"api/RESTCliente/Login?idcliente={idcliente}");
             return await _resp.Content.ReadFromJsonAsync<RestMessage>();
         }
         #endregion

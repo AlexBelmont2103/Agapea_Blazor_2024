@@ -1,0 +1,182 @@
+﻿@page "/Cliente/Panel/InicioPanel"
+@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+
+@inject IStorageService storageSvc
+@inject NavigationManager navigate
+@inject IRestService restSvc
+@inject IJSRuntime jsSvc
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Mi perfil</h2>
+            <div></div><!--sangria-->
+            <div class="alert alert-secondary" data-bs-toggle="collapse" href="#collapseDatos">Datos de perfil</div>
+            <div class="collapse" id="collapseDatos">
+
+                <form method="post" asp-controller="Cliente" asp-action="InicioPanel">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="row text-muted">Correo electrónico</div>
+                            <div class="row"><input type="text" id="inputEmail" class="input-group-text" style="width:90%" @bind="@this.clienteLogged.Credenciales.Email" /></div>
+                            <div class="row text-muted">Contraseña</div>
+                            <div class="row"><input type="password" id="inputPass" class="input-group-text" style="width:90%" @bind="@this.clienteLogged.Credenciales.Password" /></div>
+                            <div class="row text-muted">Nombre</div>
+                            <div class="row"><input type="text" id="inputNombre" class="input-group-text" style="width:90%" @bind="@this.clienteLogged.Nombre" /></div>
+
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="row text-muted">Teléfono</div>
+                            <div class="row"><input type="text" id="inputTlfn" class="input-group-text" style="width:90%" @bind="@this.clienteLogged.Telefono" /></div>
+                            <div class="row text-muted">Repetir la contraseña</div>
+                            <div class="row"><input type="password" id="inputPassRep" class="input-group-text" style="width:90%" /></div>
+                            <div class="row text-muted">Apellidos</div>
+                            <div class="row"><input type="text" id="inputApellidos" class="input-group-text" style="width:90% " @bind="@this.clienteLogged.Apellidos" /></div>
+
+                        </div>
+                    </div>
+                    <div class="row"><span></span></div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="text-muted">Foto</div>
+                            <div id="avatarPerfil" class="card" style="width:200px;height:250px; background-color:aliceblue">
+                                <input type="file" accept="image/*" id="selectorImagen" name="imagen" style="visibility: hidden;" />
+                                <a onclick="javascript:document.getElementById('selectorImagen').dispatchEvent(new MouseEvent('click'))">
+                                    <!-- $('#selectorImagen').click()" -->
+                                    <!-- si en el src quieres usar el nombre del fihcero src="https://localhost:7152/images/uploads_imags/(arroba)this.clienteLogged.ImagenCuenta"-->
+                                    <img id="imagenUsuario" style="height:250px; width:200px;" src="@(this.clienteLogged.Credenciales.ImagenCuentaBASE64 != "" ? this.clienteLogged.Credenciales.ImagenCuentaBASE64 : "/images/imagen_usuario_sinavatar.jpg" )" />
+                                </a>
+                            </div>
+                            <button type="button" class="btn btn-link btn-sm" id="botonUploadImagen" disabled>+ Sube una foto</button>
+                            <div id="mensajeServicioREST"></div>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="row text-muted">Usuario</div>
+                            <div class="row"><input type="text" id="inputUsuario" class="input-group-sm" @bind="@this.clienteLogged.Credenciales.Login" /></div>
+                            <div class="row text-muted">Genero</div>
+                            <div class="row">
+                                <select class="form-select" aria-label="Elige genero" @bind="@this.clienteLogged.Genero">
+                                    <option selected>Elige genero</option>
+
+                                    <option value="Hombre">Hombre</option>
+                                    <option value="Mujer">Mujer</option>
+                                </select>
+                            </div>
+                            <div class="row text-muted">Fecha de nacimiento</div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <select name="dia" id="dia" class="form-select">
+                                        <option>Elige día</option>
+                                        @for (int a = 1; a <= 31; a++)
+                                        {
+                                            <option value="@a">@a</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select name="mes" id="mes" class="form-select">
+                                        <option>Elige mes</option>
+                                        @foreach (KeyValuePair<String, String> elemento in this.meses)
+                                        {
+                                            <option value="@elemento.Key">@elemento.Value</option>
+                                        }
+
+                                    </select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select name="anio" id="anio" class="form-select">
+                                        <option value="" selected="">Elige año</option>
+                                        @for (int a = 2022; a >= 1923; a--)
+                                        {
+                                            <option value="@a">@a</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row text-muted">Descripcion</div>
+                            <div class="row"><textarea id="textArea" @bind="@this.clienteLogged.Descripcion">@this.clienteLogged.Descripcion</textarea> </div>
+                            <div class="row">
+                                <div class="col-6 ro2 align-text-top"><a href=""> Darme de baja</a></div>
+                                <div class="col-6">
+                                    <button type="submit" id="btnSubmitCliente" class="btn btn-primary btn-sm">Guardar Nuevos Datos del Cliente</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="alert alert-secondary" data-bs-toggle="collapse" href="#collapseDirecciones">Direcciones</div>
+            <div class="collapse" id="collapseDirecciones">
+                <div>
+                    <p> Guarda todas tus direcciones de envío y elige la que usarás por defecto donde llegarán tus pedidos.</p>
+
+                    <p>
+                        Estas son las direcciones a las que puedes hacer tus envíos. Las direcciones de envío serán las que elijas mientras que la
+                        facturación será la misma en todas las direcciones:
+                    </p>
+                </div>
+
+                <hr />
+                <!-- lista de direcciones del cliente -->
+                <div class="container">
+                    @foreach (Direccion unadirec in this.clienteLogged.DireccionesCliente)
+                    {
+                        <MiniDireccion direc="@unadirec" ModificarDireccionEvento="@ModificarDireccion"></MiniDireccion>
+                    }
+                </div>
+
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    + Nueva Direccion
+                </button>
+
+                <!-- Modal -->
+                <FormModalDirecciones @ref="refModal" operacion="@this.operacion"></FormModalDirecciones>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    public Cliente clienteLogged { get; set; }
+    FormModalDirecciones refModal ;
+    public String operacion { get; set; } = "crear";
+    public Dictionary<string, string> meses = new Dictionary<String, String>()
+                                {
+                                    { "01", "Enero"},
+                                    { "02", "Febrero"},
+                                    { "03", "Marzo"},
+                                    { "04", "Abril"},
+                                    { "05", "Mayo"},
+                                    { "06", "Junio"},
+                                    { "07", "Julio"},
+                                    { "08", "Agosto"},
+                                    { "09", "Septiembre"},
+                                    { "10", "Octubre"},
+                                    { "11", "Noviembre"},
+                                    { "12", "Diciembre"}
+                                };
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.clienteLogged=this.storageSvc.RecuperarDatosCliente();
+        await this.jsSvc.InvokeVoidAsync("console.log", "datos del cliente...", this.clienteLogged);
+    }
+    public async Task ModificarDireccion(Direccion direc)
+    {
+        //Recibimos la direccion del evento del componente "MiniDireccion"
+        //Lo suyo sería poder mandar la direccion al modal como parametro
+        this.refModal.direccionEd = direc;
+        //Cambiamos el parametro que mandamos al modal
+        this.operacion = "modificar";
+        //Cómo abro el modal desde aqui?
+        await jsSvc.InvokeVoidAsync("$(#staticBackdrop).modal", "show");
+
+    }
+}

@@ -1,12 +1,11 @@
 ﻿@page "/Tienda/FinalizarPedido"
 
-
 @using Agapea_Blazor_2024.Client.Models.Services.Interfaces
-
+@inject IRestService restSvc
 @inject IStorageService storageSvc
 @inject NavigationManager navigate
-@inject IRestService restSvc
-@inject IJSRuntime jsSvc
+
+
 @*
 
     si en la url vienen dos parametros en la querystring con este formato ? idcliente=.... & idpedido=....

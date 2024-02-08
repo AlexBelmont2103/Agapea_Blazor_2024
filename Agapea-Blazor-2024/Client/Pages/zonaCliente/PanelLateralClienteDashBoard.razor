@@ -1,0 +1,45 @@
+﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inject IStorageService storageSvc
+@inject NavigationManager navigate
+
+<h6 class="text-dark mt-4 ms-3">PANEL PERSONAL DEL CLIENTE</h6>
+<div class="container">
+    <!-- fila con imagen cliente y nombre y email de bienvenida-->
+    <div class="row" style="background:#ededed;">
+        <div class="col text-center">
+            <img id="imagenPanelCliente" src="@(clienteLogged.Credenciales.ImagenCuentaBASE64 != "" ? clienteLogged.Credenciales.ImagenCuentaBASE64 : "/images/imagen_usuario_sinavatar.jpg" )" style="width:115px; height:140px;" />
+        </div>
+    </div>
+
+    <div class="row" style="background:#ededed;">
+        <div class="col">
+            <p class="text-muted"><small>Bienvenido @clienteLogged.Nombre @clienteLogged.Apellidos (@clienteLogged.Credenciales.Email)</small></p>
+        </div>
+    </div>
+
+    <!-- fila con opciones panel cliente-->
+    <div class="row">
+        <div class="col">
+            <div class="list-group">
+
+                @foreach (String opcion in new List<String> { "Inicio Panel", "Mis Compras", "Mis Opiniones", "Mis Listas" })
+                {
+                    <button type="button" @onclick="@(()=>this.navigate.NavigateTo("/Cliente/Panel/" + opcion.Replace(" ","")))"
+                            class="list-group-item list-group-item-action border border-end-0 border-start-0 text-dark">
+                        @opcion
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    public Cliente clienteLogged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this.clienteLogged = this.storageSvc.RecuperarDatosCliente();
+    }
+}
