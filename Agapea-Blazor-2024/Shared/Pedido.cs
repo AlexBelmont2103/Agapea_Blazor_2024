@@ -8,7 +8,7 @@
         public DateTime FechaPedido { get; set; } = DateTime.Now;
         public List<ItemPedido> ElementosPedido { get; set; } = new List<ItemPedido>();
         public Direccion DireccionEnvio { get; set; }
-        public Direccion DireccionFacturacion { get; set; }
+        public Direccion? DireccionFacturacion { get; set; } = null;
 
         public Decimal SubTotal { get; set; } = 0;
         public Decimal GastosEnvio { get; set; } = 2;

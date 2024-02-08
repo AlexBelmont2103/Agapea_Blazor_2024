@@ -4,6 +4,7 @@ using Agapea_Blazor_2024.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Agapea_Blazor_2024.Server.Migrations
 {
     [DbContext(typeof(AplicacionDBContext))]
-    partial class AplicacionDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240208102307_6_correciones_pedido")]
+    partial class _6_correciones_pedido
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

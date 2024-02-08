@@ -128,6 +128,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 //Creamos un cliente con los datos del cliente seleccionado
                 Cliente _cliente = new Cliente()
                 {
+                    IdCliente = _clienteALoguear.Id,
                     Nombre = _clienteALoguear.Nombre,
                     Apellidos = _clienteALoguear.Apellidos,
                     Genero = _clienteALoguear.Genero,
@@ -195,6 +196,27 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 {
                     throw new Exception("Error al hacer login: " + _resultadoLogin.ToString());
                 }
+                Cliente _clienteADevolver = new Cliente()
+                {
+                    IdCliente = _clienteALoguear.Id,
+                    Nombre = _clienteALoguear.Nombre,
+                    Apellidos = _clienteALoguear.Apellidos,
+                    Genero = _clienteALoguear.Genero,
+                    Descripcion = _clienteALoguear.Descripcion,
+                    Telefono = _clienteALoguear.PhoneNumber,
+                    Credenciales = new Cuenta()
+                    {
+                        Login = _clienteALoguear.UserName,
+                        Password = credenciales.Password,
+                        Email = _clienteALoguear.Email,
+                        ImagenCuentaBASE64 = _clienteALoguear.ImagenAvatarBASE64,
+                        CuentaActiva = _clienteALoguear.EmailConfirmed
+                    }
+                };
+                //Seleccionamos direcciones pedidos y opiniones del cliente
+                _clienteADevolver.DireccionesCliente = this._dbcontext.Direcciones.Where(d => d.IdCliente == _clienteALoguear.Id).ToList();
+                _clienteADevolver.OpinionesCliente = this._dbcontext.Opiniones.Where(o => o.IdCliente == _clienteALoguear.Id).ToList();
+                _clienteADevolver.PedidosCliente = this._dbcontext.Pedidos.Where(p => p.IdCliente == _clienteALoguear.Id).ToList();
                 //2º: Si las credenciales son correctas, generar un token de sesion y devolverlo al cliente
                 String _tokenSesion = await this._userManagerService.GenerateUserTokenAsync(_clienteALoguear, "Default", "tokenSesion");
                 return new RestMessage()
@@ -203,22 +225,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                     Mensaje = "Login correcto",
                     Error = "",
                     Tokensesion = _tokenSesion,
-                    DatosCliente = new Cliente()
-                    {
-                        Nombre = _clienteALoguear.Nombre,
-                        Apellidos = _clienteALoguear.Apellidos,
-                        Genero = _clienteALoguear.Genero,
-                        Descripcion = _clienteALoguear.Descripcion,
-                        Telefono = _clienteALoguear.PhoneNumber,
-                        Credenciales = new Cuenta()
-                        {
-                            Login = _clienteALoguear.UserName,
-                            Password = credenciales.Password,
-                            Email = _clienteALoguear.Email,
-                            ImagenCuentaBASE64 = _clienteALoguear.ImagenAvatarBASE64,
-                            CuentaActiva = _clienteALoguear.EmailConfirmed
-                        }
-                    },
+                    DatosCliente = _clienteADevolver,
                     OtrosDatos = null
                 };
             }

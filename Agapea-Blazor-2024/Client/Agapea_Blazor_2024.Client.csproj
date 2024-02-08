@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Pages\zonaPedido\PedidoFinalizadoOk.razor" />
+    <Content Remove="Pages\zonaPedido\FinalizarPedido.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,15 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <UpToDateCheckInput Remove="Pages\zonaPedido\PedidoFinalizadoOk.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Pages\zonaPedido\PedidoFinalizadoOk.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Pages\zonaPedido\PedidoFinalizadoOk.razor" />
+    <None Include="Pages\zonaPedido\FinalizarPedido.razor" />
   </ItemGroup>
 
 </Project>

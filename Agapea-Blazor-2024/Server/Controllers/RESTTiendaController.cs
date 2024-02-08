@@ -275,6 +275,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                                                                   .Select((PedidoPayPal ppp) => ppp.OrderId).Single<String>();
                     HttpRequestMessage _requestCapture = new HttpRequestMessage(HttpMethod.Post, $"https://api-m.sandbox.paypal.com/v2/checkout/orders/{_orderId}/capture");
                     _requestCapture.Headers.Add("Authorization", $"Bearer {_accessToken}");
+                    _requestCapture.Content = new StringContent("", Encoding.UTF8, "application/json");
                     HttpResponseMessage _responseCapture = await cliente.SendAsync(_requestCapture);
                     if (_responseCapture.IsSuccessStatusCode)
                     {
@@ -284,10 +285,10 @@ namespace Agapea_Blazor_2024.Server.Controllers
                         if (_status == "APPROVED" || _status == "COMPLETED")
                         {
                             //Actualizar el pedido en la tabla pedidos
-                            Pedido _pedido = this._dbContext.Pedidos.Where((Pedido p) => p.IdCliente == idcliente && p.IdPedido == idpedido).Single<Pedido>();
+                            Pedido _pedido = this._dbContext.Pedidos.Select((Pedido p) => p).Where((Pedido p) => p.IdPedido == idpedido).Single<Pedido>();
                             _pedido.EstadoPedido = "En preparación";
                             await this._dbContext.SaveChangesAsync();
-                            return Redirect($"https://localhost:7286/Tienda/PedidoFinalizadoOk?idpedido={idpedido}&idcliente={idcliente}");
+                            return Redirect($"https://localhost:7286/Tienda/FinalizarPedido?idpedido={idpedido}&idcliente={idcliente}");
                         }
                         else
                         {

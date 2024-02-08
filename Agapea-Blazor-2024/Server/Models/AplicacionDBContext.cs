@@ -123,11 +123,12 @@ namespace Agapea_Blazor_2024.Server.Models
                 .HasConversion(
                     dir => dir != null ? JsonSerializer.Serialize<Direccion>(dir, (JsonSerializerOptions)null) : null,
                     dir => dir != null ? JsonSerializer.Deserialize<Direccion>(dir, (JsonSerializerOptions)null) : null
-                ).HasColumnName("DireccionFacturacion");
+                ).HasColumnName("DireccionFacturacion").IsRequired(false);
             builder.Entity<Pedido>().Property((Pedido ped) => ped.SubTotal).IsRequired();
             builder.Entity<Pedido>().Property((Pedido ped) => ped.GastosEnvio).IsRequired();
             builder.Entity<Pedido>().Property((Pedido ped) => ped.Total).IsRequired();
             builder.Entity<Pedido>().Property((Pedido ped) => ped.EstadoPedido).IsRequired().HasMaxLength(50);
+            builder.Entity<Pedido>().Property((Pedido ped) => ped.IdCliente).IsRequired();
             #endregion
             #region /// CREACION DE TABLA CATEGORIAS A PARTIR DE LA CLASE MODELO CATEGORIA
             //builder.Entity<Categoria>().ToTable("Categorias");
