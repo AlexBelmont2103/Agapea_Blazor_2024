@@ -9,28 +9,48 @@ namespace Agapea_Blazor_2024.Client.Models.Services
     {
         #region propiedades del servicio
         private HttpClient _httpClient;
+        private IStorageService _storageService;
         #endregion
-        public MiRestService(HttpClient httpClient)
+        public MiRestService(HttpClient httpClient, IStorageService storageService)
         {
             this._httpClient = httpClient;
+            this._storageService = storageService;
+
         }
         #region metodos del servicio
         #region ///// llamada endpoints zona Cliente /////
-        public async Task<RestMessage> LoginCliente(Cuenta credenciales)
-        {
-            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Cuenta>("api/RESTCliente/Login", credenciales);
-            RestMessage _bodyResp = await _resp.Content.ReadFromJsonAsync<RestMessage>();
-            return _bodyResp;
-        }
         public async Task<RestMessage> RegistrarCliente(Cliente NuevoCliente)
         {
             HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Cliente>("api/RESTCliente/Registro", NuevoCliente);
             RestMessage _bodyResp = await _resp.Content.ReadFromJsonAsync<RestMessage>();
             return _bodyResp;
         }
+        public async Task<RestMessage> LoginCliente(Cuenta credenciales)
+        {
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Cuenta>("api/RESTCliente/Login", credenciales);
+            RestMessage _bodyResp = await _resp.Content.ReadFromJsonAsync<RestMessage>();
+            return _bodyResp;
+        }
         public async Task<RestMessage> LoginCliente(string idcliente)
         {
             HttpResponseMessage _resp = await this._httpClient.GetAsync($"api/RESTCliente/Login?idcliente={idcliente}");
+            return await _resp.Content.ReadFromJsonAsync<RestMessage>();
+        }
+        public async Task<RestMessage> OperarDireccion(Direccion direccion, string operacion)
+        {
+            Dictionary<String, String> _datos = new Dictionary<String, string> {
+                { "Direccion", JsonSerializer.Serialize<Direccion>(direccion) },
+                { "Operacion", operacion}
+            };
+            //tengo q mandar el token al servicio, sino ni me dejara mandar nada....
+            //hay q mandarselo en una cabecera "Authorization: Basic .....jwt...."
+            String _jwt = this._storageService.RecuperarJWT();
+            this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+
+            HttpResponseMessage _resp = await this._httpClient
+                                            .PostAsJsonAsync<Dictionary<String, String>>(
+                                                    "/api/RESTCliente/OperarDireccion", _datos
+                                             );
             return await _resp.Content.ReadFromJsonAsync<RestMessage>();
         }
         #endregion
@@ -95,6 +115,8 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Dictionary<string, string>>("/api/RESTTienda/FinalizarPedido", _dic);
             return await _resp.Content.ReadAsStringAsync();
         }
+
+
 
         #endregion
         #endregion

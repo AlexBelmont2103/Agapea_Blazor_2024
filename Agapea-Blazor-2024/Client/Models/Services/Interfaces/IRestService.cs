@@ -10,6 +10,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         Task<RestMessage> RegistrarCliente(Cliente NuevoCliente);
         Task<RestMessage> LoginCliente(Cuenta credenciales);
         Task<RestMessage> LoginCliente(String idcliente);
+        Task<RestMessage> OperarDireccion(Direccion direccion, String operacion);
         #endregion
 
         #region metodos/props para zonaTienda

@@ -2,6 +2,7 @@
 
 @inject IRestService restSvc
 @inject IJSRuntime jsSvc
+@inject IStorageService storageSvc
 
 
   
@@ -62,10 +63,10 @@
                                 </InputSelect>
                             </div>
 
-                            <input type="hidden" id="inputOperacion" name="operacion" value="crear" />
+                            <input type="hidden" id="inputOperacion" name="operacion" value="@operacion" />
                             <hr />
                             <div class="col-12">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="@this.Close">Cancelar</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >Cancelar</button>
                                 <button type="submit" class="btn btn-primary" id="btnCrearDireccion">@this.textButtonForm</button>
                             </div>
                         </EditForm>
@@ -77,6 +78,8 @@
 </div>
 
 @code {
+    [Parameter]
+    public EventCallback<Dictionary<Direccion, String>> CrearModificarEvent { get; set; } = new EventCallback<Dictionary<Direccion, String>>();
     [Parameter]
     public String operacion { get; set; }
 
@@ -95,49 +98,33 @@
     protected override async Task OnInitializedAsync()
     {
         this.listaprovincias = await this.restSvc.RecuperarProvincias();
-        Console.WriteLine("Direccion a editar");
-        Console.WriteLine(this.direccionEd.IdDireccion);
-        Console.WriteLine("Operacion a realizar: "+this.operacion);
+        this.direccionEd.IdCliente =  this.storageSvc.RecuperarDatosCliente().IdCliente;
     }
-    protected override void OnParametersSet()
-    {
-        Console.WriteLine("Se ejectua OnParametersSet");
-        if(this.operacion=="modificar"){
-            this.textButtonForm = "Modificar Direccion";
-        }
-        StateHasChanged();
-    }
+ 
     protected async Task RecuperaMunicipios(ChangeEventArgs ev)
     {
         this.disabledMunis = false;
         this.listamunicipios = await this.restSvc.RecuperarMunicipios(ev.Value.ToString().Split("-")[0]);
     }
-    public void Open()
-    {
-        this.modalClass = "modal fade show";
-        this.style = "display:block;padding-right_15px;";
-    }
 
-    public void Close()
-    {
-        this.modalClass = "modal fade";
-        this.style = "display:none;";
-    }
     public async Task CrearModificaDirec()
     {
-        Console.WriteLine("Operacion a realizar: " + this.operacion);
-        if (this.operacion == "crear")
-        {
-            
-            Console.WriteLine("Direccion a crear");
-            Console.WriteLine(this.direccionEd.IdDireccion);
-            Console.WriteLine(this.direccionEd.Calle);
-
-        }
-        else
-        {
-            Console.WriteLine("Direccion a modificar");
-            Console.WriteLine(this.direccionEd.IdDireccion);
-        }
+        if (this.operacion == "pendiente-modificar") this.operacion = "modificar";
+        this.direccionEd.ProvinciaDirec = new Provincia
+            {
+                CCOM = "",
+                CPRO = this.provincia.Split("-")[0],
+                PRO = this.provincia.Split("-")[1]
+            };
+        this.direccionEd.MunicipioDirec = new Municipio
+            {
+                CPRO = this.provincia.Split("-")[0],
+                CMUM = this.municipio.Split("-")[0],
+                DMUN50 = this.municipio.Split("-")[1],
+                CUN = ""
+            };
+        await this.CrearModificarEvent.InvokeAsync(new Dictionary<Direccion, string> { { this.direccionEd, this.operacion } });
+        //oculto modal...
+        await this.jsSvc.InvokeVoidAsync("window.adminFormModal.HideModal", "staticBackdrop");
     }
 }

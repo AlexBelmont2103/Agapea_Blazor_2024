@@ -124,17 +124,18 @@
                 <div class="container">
                     @foreach (Direccion unadirec in this.clienteLogged.DireccionesCliente)
                     {
-                        <MiniDireccion direc="@unadirec" ModificarDireccionEvento="@ModificarDireccion"></MiniDireccion>
+                        <MiniDireccion direc="@unadirec" EliminarDireccionEvento="@((Direccion direc)=> OperarDireccion(direc,"borrar"))"
+                                       ModificarDireccionEvento="@((Direccion direc)=> OperarDireccion(direc,"pendiente-modificar"))"></MiniDireccion>
                     }
                 </div>
 
                 <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" >
                     + Nueva Direccion
                 </button>
 
                 <!-- Modal -->
-                <FormModalDirecciones @ref="refModal" operacion="@this.operacion"></FormModalDirecciones>
+                <FormModalDirecciones @ref="refModal" CrearModificarEvent="@((Dictionary<Direccion,string>datos)=> this.OperarDireccion(datos.Keys.ToArray<Direccion>()[0], datos.Values.ToArray<string>()[0] ))"></FormModalDirecciones>
 
 
             </div>
@@ -168,21 +169,41 @@
         this.clienteLogged=this.storageSvc.RecuperarDatosCliente();
         await this.jsSvc.InvokeVoidAsync("console.log", "datos del cliente...", this.clienteLogged);
     }
-    public async Task ModificarDireccion(Direccion direc)
-    {
-        //Recibimos la direccion del evento del componente "MiniDireccion"
-        //Lo suyo sería poder mandar la direccion al modal como parametro
-        this.refModal.direccionEd = direc;
-        //Cambiamos el parametro que mandamos al modal
-        this.operacion = "modificar";
-        //Cómo abro el modal desde aqui?
-        //await jsSvc.InvokeVoidAsync("$(#staticBackdrop).modal", "show");
-        this.refModal.Open();
 
-    }
-    public async Task CrearNuevaDireccion()
+    #region ///GESTION DE DIRECCIONES DEL CLIENTE///
+    public async Task OperarDireccion(Direccion direc, String operacion)
     {
-        this.operacion = "crear";
-        this.refModal.direccionEd = new Direccion();
+        switch (operacion)
+        {
+            case "pendiente-modificar":
+                //mostrar el popup de crear direccion con los datos de la direccion a modificar
+                this.refModal.direccionEd = direc;
+                this.refModal.operacion = "modificar";
+                await this.jsSvc.InvokeVoidAsync("window.adminFormModal.ShowModal", "staticBackdrop");
+                break;
+
+            case "crear":
+            case "modificar":
+            case "borrar":
+                direc.IdCliente = this.clienteLogged.IdCliente;
+
+                RestMessage _resp = await this.restSvc.OperarDireccion(direc, operacion);
+                if (_resp.Codigo == 0)
+                {
+                    this.clienteLogged = _resp.DatosCliente;
+                    this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+                    this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
+
+                    StateHasChanged();
+                }
+                else
+                {
+                    //mostrar en vista mensaje de error al eliminar direccion
+                    await this.jsSvc.InvokeVoidAsync("console.log", _resp.Error);
+                }
+
+                break;
+        }
     }
+    #endregion
 }
