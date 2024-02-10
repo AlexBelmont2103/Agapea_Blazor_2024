@@ -38,6 +38,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         }
         public async Task<RestMessage> OperarDireccion(Direccion direccion, string operacion)
         {
+
             Dictionary<String, String> _datos = new Dictionary<String, string> {
                 { "Direccion", JsonSerializer.Serialize<Direccion>(direccion) },
                 { "Operacion", operacion}
@@ -48,10 +49,38 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
 
             HttpResponseMessage _resp = await this._httpClient
-                                            .PostAsJsonAsync<Dictionary<String, String>>(
-                                                    "/api/RESTCliente/OperarDireccion", _datos
+                                            .PostAsJsonAsync(
+                                                    "api/RESTCliente/OperarDireccion", _datos
                                              );
             return await _resp.Content.ReadFromJsonAsync<RestMessage>();
+
+
+        }
+        public async Task<RestMessage> UploadImagen(string imagenbase64, string idcliente)
+        {
+            //Creo un Dictionary con los datos que voy a enviar al servidor
+            Dictionary<string, string> _datos = new Dictionary<string, string>
+            {
+                { "imagenbase64", imagenbase64 },
+                { "idcliente", idcliente }
+            };
+            //Recupero el jwt para enviarlo en la cabecera de la peticion
+            string _jwt = this._storageService.RecuperarJWT();
+            this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+            //Hago la peticion al servidor
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Dictionary<string, string>>("api/RESTCliente/UploadImagen", _datos);
+            return await _resp.Content.ReadFromJsonAsync<RestMessage>();
+
+        }
+        public async Task<RestMessage> UpdateCliente(Cliente datoscliente)
+        {
+            //Recupero el jwt para enviarlo en la cabecera de la peticion
+            string _jwt = this._storageService.RecuperarJWT();
+            this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+            //Hago la peticion al servidor
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Cliente>("api/RESTCliente/UpdateCliente", datoscliente);
+            return await _resp.Content.ReadFromJsonAsync<RestMessage>();
+
         }
         #endregion
 
@@ -90,7 +119,6 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             }
 
         }
-
         public async Task<List<Municipio>> RecuperarMunicipios(string cpro)
         {
             try
@@ -104,7 +132,6 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             }
 
         }
-
         public async Task<String> FinalizarPedido(DatosPago datos, Pedido pedido)
         {
             Dictionary<string, string> _dic = new Dictionary<string, string>()
@@ -115,7 +142,6 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Dictionary<string, string>>("/api/RESTTienda/FinalizarPedido", _dic);
             return await _resp.Content.ReadAsStringAsync();
         }
-
 
 
         #endregion

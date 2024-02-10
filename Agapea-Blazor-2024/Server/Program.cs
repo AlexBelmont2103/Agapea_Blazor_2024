@@ -73,7 +73,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)  // <
             ValidateIssuerSigningKey = true, //Validar la firma del token (claim "sign")
             ValidateAudience = false, //Validar subdominios para los que es válido el token (claim "aud")
             ValidIssuer = builder.Configuration["JWT:issuer"], //Establecer el emisor del token
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:firma"])), //Establecer la clave de firma del token
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:firmaJWT"])), //Establecer la clave de firma del token
         };
     }
     ); // <= Configuracion de la comprobacion de los claims de los JWT recibidos desde el cliente blazor

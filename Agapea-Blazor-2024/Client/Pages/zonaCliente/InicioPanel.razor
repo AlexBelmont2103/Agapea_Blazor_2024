@@ -1,5 +1,7 @@
 ﻿@page "/Cliente/Panel/InicioPanel"
 @using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@using Agapea_Blazor_2024.Client.Models.Services
+@using System.ComponentModel.DataAnnotations
 
 @inject IStorageService storageSvc
 @inject NavigationManager navigate
@@ -14,7 +16,25 @@
             <div class="alert alert-secondary" data-bs-toggle="collapse" href="#collapseDatos">Datos de perfil</div>
             <div class="collapse" id="collapseDatos">
 
-                <form method="post" asp-controller="Cliente" asp-action="InicioPanel">
+                 <EditForm EditContext="this.FormContext" OnSubmit="this.UpdateCliente">
+                     <!-- si lo haces asi intentara validar la password, y no quiero q sea campo obligatorio...provoco validacion desde codigo
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                    <ValidationSummary style="color:red"></ValidationSummary>
+                     -->
+                    <!-- mi validationsummary...-->                    
+                    @if (this.ErroresValidacion.Count > 0)
+                    {
+                    <div class="row">
+                        <ul>
+                            @foreach (String item in this.ErroresValidacion)
+                            {
+                                    <li><span style="color:red">@item</span></li>
+                            }
+
+                        </ul>
+                    </div>    
+                    }
+
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="row text-muted">Correo electrónico</div>
@@ -30,26 +50,30 @@
                             <div class="row text-muted">Teléfono</div>
                             <div class="row"><input type="text" id="inputTlfn" class="input-group-text" style="width:90%" @bind="@this.clienteLogged.Telefono" /></div>
                             <div class="row text-muted">Repetir la contraseña</div>
-                            <div class="row"><input type="password" id="inputPassRep" class="input-group-text" style="width:90%" /></div>
+                            <div class="row"><input type="password" id="inputPassRep" class="input-group-text" style="width:90%" @bind="@this.repassword" /></div>
                             <div class="row text-muted">Apellidos</div>
                             <div class="row"><input type="text" id="inputApellidos" class="input-group-text" style="width:90% " @bind="@this.clienteLogged.Apellidos" /></div>
 
                         </div>
                     </div>
-                    <div class="row"><span></span></div>
+
                     <div class="row">
                         <div class="col-sm-4">
                             <div class="text-muted">Foto</div>
-                            <div id="avatarPerfil" class="card" style="width:200px;height:250px; background-color:aliceblue">
-                                <input type="file" accept="image/*" id="selectorImagen" name="imagen" style="visibility: hidden;" />
-                                <a onclick="javascript:document.getElementById('selectorImagen').dispatchEvent(new MouseEvent('click'))">
-                                    <!-- $('#selectorImagen').click()" -->
-                                    <!-- si en el src quieres usar el nombre del fihcero src="https://localhost:7152/images/uploads_imags/(arroba)this.clienteLogged.ImagenCuenta"-->
-                                    <img id="imagenUsuario" style="height:250px; width:200px;" src="@(this.clienteLogged.Credenciales.ImagenCuentaBASE64 != "" ? this.clienteLogged.Credenciales.ImagenCuentaBASE64 : "/images/imagen_usuario_sinavatar.jpg" )" />
-                                </a>
+
+                            <div id="avatarPerfil" class="card" style="width:200px;height:250px; background-color:aliceblue" onclick="javascript: window.document.getElementById('selectorImagen').dispatchEvent(new MouseEvent('click'));">
+                                <InputFile id="selectorImagen" accept="image/*" style="visibility:hidden;" OnChange="PrevisualizarImagen" />
+
+                                <img src="@this.ImgSrc" id="imagenUsuario" style="width:200;height:250;" />
+
                             </div>
-                            <button type="button" class="btn btn-link btn-sm" id="botonUploadImagen" disabled>+ Sube una foto</button>
-                            <div id="mensajeServicioREST"></div>
+                            @if (! String.IsNullOrEmpty(this.MensajeUploadImgServer))
+                            {
+                                <div id="mensajeServer"><span style=@(this.MensajeUploadImgServer.Contains("OK") ? "color:green" : "color:red")>@this.MensajeUploadImgServer</span></div>
+
+                            }
+                            <button id="botonUploadImagen" type="button" class="btn btn-link btn-sm" disabled="@this.btnUploadImgDisabled" @onclick="@this.UploadImagen">+ Sube una foto</button>
+
                         </div>
                         <div class="col-sm-8">
                             <div class="row text-muted">Usuario</div>
@@ -102,9 +126,15 @@
                                     <button type="submit" id="btnSubmitCliente" class="btn btn-primary btn-sm">Guardar Nuevos Datos del Cliente</button>
                                 </div>
                             </div>
+
                         </div>
                     </div>
-                </form>
+
+                    @if (! String.IsNullOrEmpty(this.MensajeUpdateDatosCliente))
+                    {
+                        <div class="row"><span style=@(this.MensajeUpdateDatosCliente.Contains("OK") ? "color:green": "color:red")>@this.MensajeUpdateDatosCliente</span></div>
+                    }
+                </EditForm>
 
             </div>
 
@@ -124,18 +154,22 @@
                 <div class="container">
                     @foreach (Direccion unadirec in this.clienteLogged.DireccionesCliente)
                     {
-                        <MiniDireccion direc="@unadirec" EliminarDireccionEvento="@((Direccion direc)=> OperarDireccion(direc,"borrar"))"
-                                       ModificarDireccionEvento="@((Direccion direc)=> OperarDireccion(direc,"pendiente-modificar"))"></MiniDireccion>
+                        <MiniDireccion direc="@unadirec"
+                                        EliminarDireccionEvento="@((Direccion direc)=> OperarDireccion(direc,"borrar"))"
+                                        ModificarDireccionEvento="@((Direccion direc)=> OperarDireccion(direc,"pendiente-modificar"))"></MiniDireccion>
                     }
                 </div>
 
                 <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" >
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                     + Nueva Direccion
                 </button>
 
                 <!-- Modal -->
-                <FormModalDirecciones @ref="refModal" CrearModificarEvent="@((Dictionary<Direccion,string>datos)=> this.OperarDireccion(datos.Keys.ToArray<Direccion>()[0], datos.Values.ToArray<string>()[0] ))"></FormModalDirecciones>
+                <FormModalDirecciones @ref="@refModal" 
+                                    CrearModificarEvent="@((Dictionary<Direccion,string>datos)=> this.OperarDireccion(datos.Keys.ToArray<Direccion>()[0], datos.Values.ToArray<string>()[0] ))">
+
+                </FormModalDirecciones>
 
 
             </div>
@@ -144,6 +178,7 @@
 </div>
 
 @code {
+    EditContext FormContext;
 
     public Cliente clienteLogged { get; set; }
     FormModalDirecciones refModal ;
@@ -163,47 +198,172 @@
                                     { "11", "Noviembre"},
                                     { "12", "Diciembre"}
                                 };
+    private String ImgSrc { get; set; } 
+    private String MensajeUploadImgServer { get; set; } = "";
+    bool btnUploadImgDisabled = true;
+
+    private String MensajeUpdateDatosCliente { get; set; } = "";
+    private String repassword { get; set; } = "";
+    private List<String> ErroresValidacion { get; set; } = new List<String>();
 
     protected override async Task OnInitializedAsync()
     {
         this.clienteLogged=this.storageSvc.RecuperarDatosCliente();
-        await this.jsSvc.InvokeVoidAsync("console.log", "datos del cliente...", this.clienteLogged);
+        if(this.clienteLogged != null)
+        {
+            this.ImgSrc = this.clienteLogged.Credenciales.ImagenCuentaBASE64;
+            await this.jsSvc.InvokeVoidAsync("console.log", "datos del cliente...", this.clienteLogged);
+            FormContext = new EditContext(this.clienteLogged);
+            FormContext.EnableDataAnnotationsValidation();
+        }
+
     }
+    #region ///GESTION DE DATOS DEL CLIENTE///
+    public async Task PrevisualizarImagen(InputFileChangeEventArgs ev)
+    {
+        IBrowserFile _fichimagen = ev.File;
+        //tengo q leer el contenido del fichero imagen seleccionado como un array de bytes
+        //y pasar ese array de bytes a base64 y mostrarlo en el src del elemento <img src="...">
+        //en formato "data: image/tipo;base64, ..."
+        byte[] _contfich = new byte[_fichimagen.Size];
+        await _fichimagen.OpenReadStream().ReadAsync(_contfich);
+
+        this.ImgSrc = $"data:{_fichimagen.ContentType};base64, {Convert.ToBase64String(_contfich)}";
+        this.btnUploadImgDisabled = false;
+
+    }
+    public async Task UploadImagen()
+    {
+        //tengo q subir al servidor la imagen avatar del usuario...
+        RestMessage _resp = await this.restSvc.UploadImagen(this.ImgSrc, this.clienteLogged.IdCliente);
+        if (_resp.Codigo == 0)
+        {
+            //refresco los datos del cliente, pq tiene nueva imagen...
+            this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+            this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
+            this.btnUploadImgDisabled = true;
+            this.MensajeUploadImgServer = _resp.Mensaje;
+
+            //para q imagen recien subida aparezca en el panel lateral disparo evento del servicio storage, q intercepta el listener q esta en el mainlayout, y asi refrescara panel...
+            (this.storageSvc as SubjectStorage).DisparaEventoRefrescoDatosCliente(_resp.DatosCliente);
+
+        }
+        else
+        {
+            //mostrar mensajes de error en div debajo del boton +Subir Foto... aunque ya lo hago en la vista viendo si el mensaje de respuesta contiene o no "OK"
+        }
+    }
+    public async Task UpdateCliente()
+    {
+        //Validaciones del modelo
+        this.ErroresValidacion.Clear();
+
+        bool _resvalid = this.FormContext.Validate();
+        if(this.clienteLogged.Credenciales.Password == this.repassword)
+        {
+            if(!_resvalid)
+            {
+                this.ErroresValidacion = this.FormContext.GetValidationMessages().ToList<String>();
+                //Vemos si la pasword está rellenada. Si no, no hacemos caso a los errores
+                bool _errorPass = this.ErroresValidacion.Any<String>(item => !item.Contains("Contraseña"));
+                if(_errorPass || ! String.IsNullOrEmpty(this.clienteLogged.Credenciales.Password))
+                {
+                    return;
+                }
+            }
+        }
+        else
+        {
+            this.ErroresValidacion.Add("* Las contraseñas no coinciden");
+            return;
+        }
+
+        //si no hay errores de validacion, actualizo datos del cliente...
+        RestMessage _resp = await this.restSvc.UpdateCliente(this.clienteLogged);
+        if (_resp.Codigo == 0)
+        {
+            this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+            this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
+            this.MensajeUpdateDatosCliente = _resp.Mensaje;
+            //para q imagen recien subida aparezca en el panel lateral disparo evento del servicio storage, q intercepta el listener q esta en el mainlayout, y asi refrescara panel...
+            (this.storageSvc as SubjectStorage).DisparaEventoRefrescoDatosCliente(_resp.DatosCliente);
+        }
+        else
+        {
+            this.MensajeUpdateDatosCliente = _resp.Error;
+        }
+    }
+    #endregion
 
     #region ///GESTION DE DIRECCIONES DEL CLIENTE///
     public async Task OperarDireccion(Direccion direc, String operacion)
     {
-        switch (operacion)
-        {
-            case "pendiente-modificar":
-                //mostrar el popup de crear direccion con los datos de la direccion a modificar
-                this.refModal.direccionEd = direc;
-                this.refModal.operacion = "modificar";
-                await this.jsSvc.InvokeVoidAsync("window.adminFormModal.ShowModal", "staticBackdrop");
-                break;
+            RestMessage _resp = new RestMessage();
+            switch (operacion)
+            {
+                case "pendiente-modificar":
+                    //mostrar el popup de crear direccion con los datos de la direccion a modificar
+                    this.refModal.direccionEd = direc;
+                    this.refModal.operacion = "modificar";
+                    this.refModal.textButtonForm = "Modificar Direccion";
+                    await this.jsSvc.InvokeVoidAsync("window.adminFormModal.ShowModal", "staticBackdrop");
+                    break;
 
-            case "crear":
-            case "modificar":
-            case "borrar":
-                direc.IdCliente = this.clienteLogged.IdCliente;
+                case "crear":
+                    direc.IdCliente = this.clienteLogged.IdCliente;
+                    _resp = await this.restSvc.OperarDireccion(direc, operacion);
+                    if (_resp.Codigo == 0)
+                    {
+                        this.clienteLogged = _resp.DatosCliente;
+                        this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+                        this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
 
-                RestMessage _resp = await this.restSvc.OperarDireccion(direc, operacion);
-                if (_resp.Codigo == 0)
-                {
-                    this.clienteLogged = _resp.DatosCliente;
-                    this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
-                    this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        //mostrar en vista mensaje de error al crear direccion
+                        await this.jsSvc.InvokeVoidAsync("console.log", _resp.Error);
+                    }
+                    break;
+                case "modificar":
+                    direc.IdCliente = this.clienteLogged.IdCliente;
+                    _resp = await this.restSvc.OperarDireccion(direc, operacion);
+                    if (_resp.Codigo == 0)
+                    {
+                        this.clienteLogged = _resp.DatosCliente;
+                        this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+                        this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
 
-                    StateHasChanged();
-                }
-                else
-                {
-                    //mostrar en vista mensaje de error al eliminar direccion
-                    await this.jsSvc.InvokeVoidAsync("console.log", _resp.Error);
-                }
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        //mostrar en vista mensaje de error al modificar direccion
+                        await this.jsSvc.InvokeVoidAsync("console.log", _resp.Error);
+                    }
+                    break;
+                case "borrar":
+                    direc.IdCliente = this.clienteLogged.IdCliente;
 
-                break;
-        }
+                    _resp = await this.restSvc.OperarDireccion(direc, operacion);
+                    if (_resp.Codigo == 0)
+                    {
+                        this.clienteLogged = _resp.DatosCliente;
+                        this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+                        this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
+
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        //mostrar en vista mensaje de error al eliminar direccion
+                        await this.jsSvc.InvokeVoidAsync("console.log", _resp.Error);
+                    }
+
+                    break;
+            }
+
     }
     #endregion
 }

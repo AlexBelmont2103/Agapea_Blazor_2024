@@ -257,6 +257,96 @@ namespace Agapea_Blazor_2024.Server.Controllers
         #region ///Gestion de datos de cliente///
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("UploadImagen")]
+        public async Task<RestMessage> UploadImagen([FromBody] Dictionary<string, string> datos)
+        {
+            try
+            {
+                //Recupero los datos del dictionary
+                String _imagenBASE64 = datos["imagenbase64"];
+                String _idcliente = datos["idcliente"];
+                MiClienteIdentity _cliente = await this._userManagerService.FindByIdAsync(_idcliente);
+                _cliente.ImagenAvatarBASE64 = _imagenBASE64;
+                IdentityResult _resultModif = await this._userManagerService.UpdateAsync(_cliente);
+                if (_resultModif.Succeeded)
+                {
+                    return new RestMessage()
+                    {
+                        Codigo = 0,
+                        Mensaje = "Imagen de cliente subida OK",
+                        Error = "",
+                        Tokensesion = this.__GeneraJWT(_cliente.Nombre, _cliente.Apellidos, _cliente.Email, _cliente.Id),
+                        DatosCliente = await this.__GenerarClienteActualizado(_idcliente),
+                        OtrosDatos = null
+                    };
+                }
+                else
+                {
+                    throw new Exception("Error al subir imagen de cliente: " + _resultModif.Errors.FirstOrDefault().Description);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RestMessage()
+                {
+                    Codigo = 1,
+                    Mensaje = "Error al subir imagen de cliente",
+                    Error = ex.Message,
+                    Tokensesion = null,
+                    DatosCliente = null,
+                    OtrosDatos = null
+                };
+            }
+        }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("UpdateCliente")]
+        public async Task<RestMessage> UpdateCliente(Cliente datoscliente)
+        {
+            MiClienteIdentity miClienteIdentity = await this._userManagerService.FindByIdAsync(datoscliente.IdCliente);
+            miClienteIdentity.Nombre = datoscliente.Nombre;
+            miClienteIdentity.Apellidos = datoscliente.Apellidos;
+            miClienteIdentity.PhoneNumber = datoscliente.Telefono;
+            miClienteIdentity.Genero = datoscliente.Genero;
+            miClienteIdentity.Descripcion = datoscliente.Descripcion;
+            miClienteIdentity.FechaNacimiento = datoscliente.FechaNacimiento;
+            miClienteIdentity.UserName = datoscliente.Credenciales.Login;
+            //Si la password que recibo no está vacía
+            if (!String.IsNullOrEmpty(datoscliente.Credenciales.Password))
+            {
+                //Cambio la password del cliente
+                miClienteIdentity.PasswordHash = this._userManagerService.PasswordHasher.HashPassword(miClienteIdentity, datoscliente.Credenciales.Password);
+            }
+            IdentityResult _resultModif = await this._userManagerService.UpdateAsync(miClienteIdentity);
+            //Generamos cliente actualizado y nuevo token de sesion
+            if (_resultModif.Succeeded)
+            {
+                return new RestMessage()
+                {
+                    Codigo = 0,
+                    Mensaje = "Datos de cliente actualizados OK",
+                    Error = "",
+                    Tokensesion = this.__GeneraJWT(miClienteIdentity.Nombre, miClienteIdentity.Apellidos, miClienteIdentity.Email, miClienteIdentity.Id),
+                    DatosCliente = await this.__GenerarClienteActualizado(datoscliente.IdCliente),
+                    OtrosDatos = null
+                };
+            }
+            else
+            {
+                return new RestMessage()
+                {
+                    Codigo = 1,
+                    Mensaje = "Error al actualizar datos de cliente",
+                    Error = _resultModif.Errors.FirstOrDefault().Description,
+                    Tokensesion = null,
+                    DatosCliente = null,
+                    OtrosDatos = null
+                };
+            }
+        }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("OperarDireccion")]
         public async Task<RestMessage> OperarDireccion([FromBody] Dictionary<string, string> datosdirec)
         {
             //en datosdirec <--- diccionario: Operacion: "crear|modificar|borrar", Direccion: "direccion_serializada" 

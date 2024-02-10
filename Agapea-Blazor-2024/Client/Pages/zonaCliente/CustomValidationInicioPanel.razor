@@ -1,0 +1,90 @@
+﻿@using System.ComponentModel.DataAnnotations
+@inherits ComponentBase
+
+@code {
+
+    /*
+    como se usa p.e en InicioPanel.cs:
+
+    <EditForm EditContext="formContext" OnValidSubmit="...">
+        <CustomValidatorInicioPanel @ref="validador" formEditContext="formContext"></CustomValidatorInicioPanel>
+        <ValidationSummary></ValidationSummary>
+    ....
+
+    </EditForm>
+        ...
+        @code {
+        public CustomValidatorInicioPanel validador {get; set; }
+        ...
+        this.validador.ClearErrors();
+        this.validator.DisplayErrors(...)
+
+ }
+
+*/
+    [Parameter]
+    public EditContext formEditContext { get; set; }
+
+    private Cliente Modelo { get; set; }
+    private ValidationMessageStore _messageStore;
+
+    protected override void OnInitialized()
+    {
+
+        this.Modelo = this.formEditContext.Model as Cliente;
+        this._messageStore = new ValidationMessageStore(this.formEditContext);
+        //manejajdores de evento cuando se solicita validacion de todo el modelo del editcontext o validacion de un campo
+        //pq ha habido cambios en el mismo
+        this.formEditContext.OnValidationRequested += (s, e) => _messageStore?.Clear(); //cada vez q se valida todo el modelo, limpio mensajes de validacion antiguos...
+        this.formEditContext.OnFieldChanged += (s, e) =>
+                        {
+                            _messageStore?.Clear(e.FieldIdentifier); //cuando cambia una prop. se limpian mensajes de validacion de esa prop.
+                            ValidaCampo(e.FieldIdentifier);
+                        };
+    }
+
+    private async Task ValidaCampo(FieldIdentifier campo)
+    {
+        //en funcion del campo asociado a prop. del modelo hago una validacion u otra...
+        if (campo.FieldName == nameof(this.Modelo.Credenciales.Password))
+        {
+            // ValidationContext _contextoPassword = new ValidationContext(this.Modelo.Credenciales.Password); //, new ValidationContext(this.Modelo.Credenciales.Password));
+            // string _valorpassword = _contextoPassword.;
+
+            //...validaciones sobre password....
+
+            if (String.IsNullOrEmpty(this.Modelo.Credenciales.Password))
+            {
+                this._messageStore.Add(campo, "* La Contraseña es obligatoria");
+            }
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(this.Modelo.Credenciales.Password, @"^(?=.*\d)(?=.*[\u0021-\u002b\u003c-\u0040])(?=.*[A-Z])(?=.*[a-z])\S{8,}$"))
+            {
+                this._messageStore.Add(campo, "* La Contraseña debe contener MAYS,MINS, digito y caracter raro");
+            }
+        }
+        //return Task.CompletedTask;
+    }
+    //--------- metodos publicos comp.validador accesibles desde variables template #variable:
+    public void ClearErrors()
+    {
+        this._messageStore?.Clear();
+        this.formEditContext?.NotifyValidationStateChanged();
+    }
+
+
+    public void DisplayErrors(Dictionary<string, List<string>> errors)
+    {
+        if (this.formEditContext is not null)
+        {
+            foreach (var err in errors)
+            {
+                this._messageStore?.Add(this.formEditContext.Field(err.Key), err.Value);
+            }
+
+            this.formEditContext.NotifyValidationStateChanged();
+        }
+    }
+
+
+}

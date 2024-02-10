@@ -181,6 +181,11 @@ namespace Agapea_Blazor_2024.Client.Models.Services
         {
             return this._datosItemsPedido;
         }
+        public void DisparaEventoRefrescoDatosCliente(Cliente cliente)
+        {
+            Console.WriteLine("...evento para refrescar datos del cliente disparado...");
+            this.ClienteRecupIndexedDBEvent.Invoke(this, cliente);
+        }
         #endregion
 
         #region metodos ASINCRONOS (no usados en este caso)

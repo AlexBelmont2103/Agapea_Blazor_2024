@@ -81,7 +81,7 @@
     [Parameter]
     public EventCallback<Dictionary<Direccion, String>> CrearModificarEvent { get; set; } = new EventCallback<Dictionary<Direccion, String>>();
     [Parameter]
-    public String operacion { get; set; }
+    public String operacion { get; set; } = "crear";
 
 
     public Direccion direccionEd { get; set; } = new Direccion();
@@ -98,9 +98,8 @@
     protected override async Task OnInitializedAsync()
     {
         this.listaprovincias = await this.restSvc.RecuperarProvincias();
-        this.direccionEd.IdCliente =  this.storageSvc.RecuperarDatosCliente().IdCliente;
     }
- 
+
     protected async Task RecuperaMunicipios(ChangeEventArgs ev)
     {
         this.disabledMunis = false;
@@ -109,7 +108,11 @@
 
     public async Task CrearModificaDirec()
     {
-        if (this.operacion == "pendiente-modificar") this.operacion = "modificar";
+        Console.WriteLine("Operacion: " + this.operacion);
+        if (this.operacion == "pendiente-modificar") 
+        {
+            this.operacion = "modificar";
+        }
         this.direccionEd.ProvinciaDirec = new Provincia
             {
                 CCOM = "",

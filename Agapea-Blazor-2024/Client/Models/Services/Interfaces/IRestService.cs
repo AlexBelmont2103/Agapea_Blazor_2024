@@ -11,6 +11,8 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         Task<RestMessage> LoginCliente(Cuenta credenciales);
         Task<RestMessage> LoginCliente(String idcliente);
         Task<RestMessage> OperarDireccion(Direccion direccion, String operacion);
+        Task<RestMessage> UploadImagen(String imagenbase64, String idcliente);
+        Task<RestMessage> UpdateCliente(Cliente datoscliente);
         #endregion
 
         #region metodos/props para zonaTienda
