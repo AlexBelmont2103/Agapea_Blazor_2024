@@ -88,14 +88,16 @@
             <div class="col-12 mt-4">
                 @Body
             </div>
-        } else
+        }
+        else
         {
-            @if(Regex.IsMatch(this.navigate.Uri,"/Cliente/Panel/"))
+            @if (Regex.IsMatch(this.navigate.Uri, "/Cliente/Panel/"))
             {
                 <div class="col-3 border-1">
                     <PanelLateralClienteDashBoard></PanelLateralClienteDashBoard>
                 </div>
-            } else
+            }
+            else
             {
                 <div class="col-3 border border-bottom-0 border-top-0 border-start-0 border-end-1 border-dark">
                     <PanelCategoriasLibros></PanelCategoriasLibros>
@@ -109,7 +111,7 @@
 </div>
 
 @code {
-    public Cliente clienteLogged { get; set; }
+    public Cliente? clienteLogged { get; set; }
     public List<ItemPedido> _listaItems { get; set; } = new List<ItemPedido>();
     public Decimal Subtotal { get; set; } = 0;
     public String? busqueda { get; set; }

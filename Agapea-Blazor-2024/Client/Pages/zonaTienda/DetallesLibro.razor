@@ -71,18 +71,21 @@
                 <div class="d-flex justify-content-center py-3 px-1">
                     <a onclick="@AddLibroPedido" class="btn btn-primary w-100 p-2" style="border-radius: 0px"><i class="fa-solid fa-cart-shopping pe-2"></i><strong> Comprar / Recoger</strong></a>
                 </div>
-                <div class="d-flex flex-row justify-content-between px-1">
-                    <a class="btn btn-outline-primary p-2 flex-fill" style="border-radius: 0px"> <small>Agregar a la lista de deseos</small></a>
+                @if (clientelogged != null)
+                {
+                    <div class="d-flex flex-row justify-content-between px-1">
+                        <a class="btn btn-outline-primary p-2 flex-fill" style="border-radius: 0px"> <small>Agregar a la lista de deseos</small></a>
 
+                        <a @onclick="ToggleDropdown" id="despliega-listas" class="btn btn-outline-primary ms-2 border border-1 border-primary position-relative" style="border-radius: 0px">
+                            <strong>:</strong>
+                            <div class="@dropdownClass" id="dropdown-listas" style="width: 150px">
+                                <div @onclick="CrearNuevaLista" class="btn btn-outline-primary w-100" style="border-radius: 0px">Agregar nueva lista</div>
+                                <a @onclick="AbrirModalListas" class="btn btn-outline-primary border-top-0 w-100" style="border-radius: 0px">Ver más listas</a>
+                            </div>
+                        </a>
+                    </div>
+                }
 
-                    <a id="despliega-listas" class="btn btn-outline-primary ms-2 border border-1 border-primary position-relative" style="border-radius: 0px">
-                        <strong>:</strong>
-                        <div class="position-absolute top-100 start-0 visually-hidden" id="dropdown-listas" style="width: 150px">
-                            <div class="btn btn-outline-primary w-100" style="border-radius: 0px">Agregar nueva lista</div>
-                            <div class="btn btn-outline-primary border-top-0 w-100" style="border-radius: 0px">Ver más listas</div>
-                        </div>
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -104,7 +107,9 @@
                             {
 
                                 <li class="list-group-item">
-                                    @{int _valor = a;}
+                                    @{
+                                        int _valor = a;
+                                    }
                                     <button @onclick="@(()=>OnClickEstrella(_valor))" value="@a">@a</button>
 
                                 </li>
@@ -155,7 +160,7 @@
                         {
                             foreach (Opinion unaopinion in opiniones)
                             {
-                                if(unaopinion.EsModerada)
+                                if (unaopinion.EsModerada)
                                 {
                                     <MiniOpinion opi="@unaopinion" />
                                 }
@@ -174,6 +179,7 @@
         </div>
         <!--///MODAL///-->
         <ModalComentario libro="@libro" opinion="@nuevaOpinion" OnEnviarOpinion="@ManejarOpinionEvent"></ModalComentario>
+        <ModalListas libro="@libro"/>
     </div>
 </div>
 
@@ -183,15 +189,21 @@
 
     public Libro libro { get; set; } = new Libro();
     public Cliente? clientelogged { get; set; }
+    public ListaLibros nuevaLista { get; set; } = new ListaLibros();
     public bool clienteTieneLibro { get; set; } = false;
     public List<Opinion> opiniones { get; set; } = new List<Opinion>();
     public Opinion nuevaOpinion { get; set; } = new Opinion();
+    private bool isDropdownVisible = false;
+    private string dropdownClass = "position-absolute top-100 start-0 visually-hidden";
+
 
     protected override async Task OnInitializedAsync()
     {
         this.libro = await this.restSvc.RecuperarLibro(this.isbn13);
         this.opiniones = await this.restSvc.RecuperarOpiniones(this.isbn13);
         this.clientelogged = this.storageSvc.RecuperarDatosCliente();
+        this.nuevaLista.IdCliente = this.clientelogged.IdCliente;
+        Console.WriteLine($"Id de nueva lista: {nuevaLista.IdLista}");
         if (this.clientelogged == null)
         {
             this.clientelogged = new Cliente();
@@ -212,6 +224,35 @@
         }
 
     }
+    private void ToggleDropdown()
+    {
+        isDropdownVisible = !isDropdownVisible;
+        dropdownClass = isDropdownVisible ? "position-absolute top-100 start-0" : "position-absolute top-100 start-0 visually-hidden";
+    }
+    public async Task CrearNuevaLista()
+    {
+        String nombreLista = await this.jsSvc.InvokeAsync<String>("prompt", "Introduce el nombre de la lista");
+        if (nombreLista != null)
+        {
+            this.nuevaLista.NombreLista = nombreLista;
+            this.nuevaLista.IdCliente = this.clientelogged.IdCliente;
+            this.nuevaLista.Libros.Add(this.libro);
+            RestMessage _resp = await this.restSvc.CrearLista(this.nuevaLista);
+            if (_resp.Codigo == 0)
+            {
+                //Recogemos datos del cliente y del token de la respuesta
+                this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+            this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
+                this.jsSvc.InvokeVoidAsync("alert", "Lista creada correctamente");
+                StateHasChanged();
+            }
+        }
+    }
+    public async Task AbrirModalListas()
+    {
+        await this.jsSvc.InvokeVoidAsync("window.adminFormModal.ShowModal", "modalListas");
+    }
+
     private void AddLibroPedido()
     {
         try
@@ -226,7 +267,7 @@
 
     }
     public async Task ManejarOpinionEvent(Opinion opinion)
-    {        
+    {
         RestMessage _resp = await this.restSvc.UploadOpinion(opinion);
         if (_resp.Codigo == 0)
         {

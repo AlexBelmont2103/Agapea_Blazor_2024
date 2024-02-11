@@ -157,6 +157,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 _cliente.DireccionesCliente = this._dbcontext.Direcciones.Where(d => d.IdCliente == idcliente).ToList();
                 _cliente.PedidosCliente = this._dbcontext.Pedidos.Where(p => p.IdCliente == idcliente).ToList();
                 _cliente.OpinionesCliente = this._dbcontext.Opiniones.Where(o => o.IdCliente == idcliente).ToList();
+                _cliente.ListasCliente = this._dbcontext.ListasLibros.Where(l => l.IdCliente == idcliente).ToList();
                 //Generamos un token de sesion para el cliente
                 String _tokenSesion = this.__GeneraJWT(_cliente.Nombre, _cliente.Apellidos, _cliente.Credenciales.Email, _cliente.IdCliente);
                 if (_clienteALoguear == null)
@@ -228,6 +229,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 _clienteADevolver.DireccionesCliente = this._dbcontext.Direcciones.Where(d => d.IdCliente == _clienteALoguear.Id).ToList();
                 _clienteADevolver.OpinionesCliente = this._dbcontext.Opiniones.Where(o => o.IdCliente == _clienteALoguear.Id).ToList();
                 _clienteADevolver.PedidosCliente = this._dbcontext.Pedidos.Where(p => p.IdCliente == _clienteALoguear.Id).ToList();
+                _clienteADevolver.ListasCliente = this._dbcontext.ListasLibros.Where(l => l.IdCliente == _clienteALoguear.Id).ToList();
                 //2º: Si las credenciales son correctas, generar un token de sesion y devolverlo al cliente
                 String _tokenSesion = this.__GeneraJWT(_clienteADevolver.Nombre, _clienteADevolver.Apellidos, _clienteADevolver.Credenciales.Email, _clienteADevolver.IdCliente);
                 return new RestMessage()
@@ -398,6 +400,18 @@ namespace Agapea_Blazor_2024.Server.Controllers
                             throw new Exception($"no existe ninguna direccion a BORRAR con ese id: {_direc.IdDireccion}");
                         }
                         break;
+                    case "principal":
+                        //recuperar todas las direcciones del cliente
+                        IQueryable<Direccion> _todasDirecciones = this._dbcontext.Direcciones.Where((Direccion d) => d.IdCliente == _direc.IdCliente);
+                        //recorrer todas las direcciones y poner a false la propiedad principal
+                        foreach (Direccion _dir in _todasDirecciones)
+                        {
+                            _dir.EsPrincipal = false;
+                        }
+                        //recuperar la direccion q quiero poner como principal y poner a true su propiedad principal
+                        Direccion _dirPrincipal = _todasDirecciones.Where((Direccion d) => d.IdDireccion == _direc.IdDireccion).Single();
+                        _dirPrincipal.EsPrincipal = true;
+                        break;
                 }
                 this._dbcontext.SaveChanges();
 
@@ -483,6 +497,87 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 };
             }
         }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("OperarOpinion")]
+        public async Task<RestMessage> OperarOpinion([FromBody] Opinion opi, [FromQuery] String operacion)
+        {
+            try
+            {
+                //Recuperar la opinion de la base de datos
+                Opinion _opinion = this._dbcontext.Opiniones.Where((Opinion o) => o.IdOpinion == opi.IdOpinion).Single();
+                switch (operacion)
+                {
+                    case ("modificar"):
+                        _opinion.Comentario = opi.Comentario;
+                        break;
+                    case ("borrar"):
+                        this._dbcontext.Opiniones.Remove(_opinion);
+                        break;
+                }
+                this._dbcontext.SaveChanges();
+                //Recuperamos cliente actualizado y generamos token de sesion
+                Cliente _cliente = await this.__GenerarClienteActualizado(_opinion.IdCliente);
+                String _jwt = this.__GeneraJWT(_cliente.Nombre, _cliente.Apellidos, _cliente.Credenciales.Email, _cliente.IdCliente);
+                return new RestMessage()
+                {
+                    Codigo = 0,
+                    Mensaje = "Opinion modificada OK",
+                    Error = "",
+                    Tokensesion = _jwt,
+                    DatosCliente = _cliente,
+                    OtrosDatos = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new RestMessage()
+                {
+                    Codigo = 1,
+                    Mensaje = "Error al modificar opinion",
+                    Error = ex.Message,
+                    Tokensesion = null,
+                    DatosCliente = null,
+                    OtrosDatos = null
+                };
+            }
+        }
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("CrearLista")]
+        public async Task<RestMessage> CrearLista(ListaLibros lista)
+        {
+            try
+            {
+                this._dbcontext.ListasLibros.Add(lista);
+                this._dbcontext.SaveChanges();
+                //Recuperamos cliente actualizado y generamos token de sesion
+                Cliente _cliente = await this.__GenerarClienteActualizado(lista.IdCliente);
+                String _jwt = this.__GeneraJWT(_cliente.Nombre, _cliente.Apellidos, _cliente.Credenciales.Email, _cliente.IdCliente);
+                return new RestMessage()
+                {
+                    Codigo = 0,
+                    Mensaje = "Lista de libros creada OK",
+                    Error = "",
+                    Tokensesion = _jwt,
+                    DatosCliente = _cliente,
+                    OtrosDatos = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new RestMessage()
+                {
+                    Codigo = 1,
+                    Mensaje = "Error al crear lista de libros",
+                    Error = ex.Message,
+                    Tokensesion = null,
+                    DatosCliente = null,
+                    OtrosDatos = null
+                };
+            }
+        }
         #endregion
         //Si quiero restringir el acceso a un metodo de un controlador a usuarios autenticados, debo decorar el metodo con el atributo [Authorize]
 
@@ -531,6 +626,7 @@ namespace Agapea_Blazor_2024.Server.Controllers
             _datoscliente.PedidosCliente = this._dbcontext.Pedidos.Where((Pedido p) => p.IdCliente == _cliente.Id).ToList<Pedido>();
             _datoscliente.DireccionesCliente = this._dbcontext.Direcciones.Where((Direccion d) => d.IdCliente == _cliente.Id).ToList<Direccion>();
             _datoscliente.OpinionesCliente = this._dbcontext.Opiniones.Where((Opinion o) => o.IdCliente == _cliente.Id).ToList<Opinion>();
+            _datoscliente.ListasCliente = this._dbcontext.ListasLibros.Where((ListaLibros l) => l.IdCliente == _cliente.Id).ToList<ListaLibros>();
 
             return _datoscliente;
         }

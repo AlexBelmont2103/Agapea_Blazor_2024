@@ -1,0 +1,35 @@
+﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inject IRestService restSvc
+@inject IStorageService stgSvc
+<div class="container">
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">@lista.NombreLista</h5>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    Ver libros
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    @foreach (var libro in lista.Libros)
+                    {
+                        <li>
+                            <div class="card">
+                                <div class="card-body">
+                                    <img src="@libro.ImagenLibroBASE64" class="card-img-top" alt="@libro.Titulo">
+                                    <h6 class="card-title">@libro.Titulo</h6>
+                                    <p class="card-text">Autor: @libro.Autores</p>
+                                    <p class="card-text">Precio: @libro.Precio €</p>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+@code {
+    [Parameter]
+    public ListaLibros lista { get; set; }
+}

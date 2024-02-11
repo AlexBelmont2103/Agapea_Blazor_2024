@@ -1,0 +1,32 @@
+﻿@page "/Cliente/Panel/MisListas"
+@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inject IRestService restSvc
+@inject IStorageService stgSvc
+
+<div class="container">
+    <div class="row m-4">
+        <div class="col">
+            <h4><strong>Mis Listas de deseos</strong></h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            @foreach (var lista in this.listas)
+            {
+                <MiniListaPanelCliente lista="@lista"></MiniListaPanelCliente>
+            }
+
+        </div>
+    </div>
+</div>
+@code {
+    public Cliente clientelogged {get; set; }
+    public List<ListaLibros> listas {get; set; } = new List<ListaLibros>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.clientelogged = this.stgSvc.RecuperarDatosCliente();
+        this.listas = this.clientelogged.ListasCliente;
+    }
+}

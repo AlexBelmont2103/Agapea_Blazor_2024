@@ -1,0 +1,65 @@
+﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inject IRestService restSvc
+@inject IStorageService stgSvc
+
+<div class="container">
+    <div id="modalListas" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 className="modal-title" id="myModalLabel">Más listas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div id="mensaje-valoracion-agregada"></div>
+                </div>
+                <div class="modal-body">
+                    @foreach (ListaLibros lista in clientelogged.ListasCliente)
+                    {
+                        <label>
+                            <input type="checkbox" checked="@IsBookInList(lista)" @onchange="@(e => HandleCheckboxChange(e, lista))" />
+                            Añadir a @lista.NombreLista
+                        </label>
+                        <br/>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="enviarComentario" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Libro libro { get; set; }
+
+    public Cliente clientelogged { get; set; }
+    public bool isCkecked { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.clientelogged = this.stgSvc.RecuperarDatosCliente();
+    }
+
+    public bool IsBookInList(ListaLibros lista)
+    {
+        return lista.Libros.Any(libro => libro.ISBN13 == this.libro.ISBN13);
+    }
+    public void HandleCheckboxChange(ChangeEventArgs e, ListaLibros lista)
+    {
+        bool isChecked = (bool)e.Value;
+        if (isChecked)
+        {
+            // Añade el libro a la lista si el checkbox está marcado
+            if (!lista.Libros.Any(libro => libro.ISBN13 == this.libro.ISBN13))
+            {
+                lista.Libros.Add(this.libro);
+            }
+        }
+        else
+        {
+            // Elimina el libro de la lista si el checkbox no está marcado
+            lista.Libros.RemoveAll(libro => libro.ISBN13 == this.libro.ISBN13);
+        }
+    }
+}

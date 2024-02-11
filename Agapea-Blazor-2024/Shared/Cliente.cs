@@ -41,7 +41,7 @@ namespace Agapea_Blazor_2024.Shared
         public List<Direccion> DireccionesCliente { get; set; } = new List<Direccion>();
         public List<Pedido> PedidosCliente { get; set; } = new List<Pedido>();
         public List<Opinion> OpinionesCliente { get; set; } = new List<Opinion>();
-
+        public List<ListaLibros> ListasCliente { get; set; } = new List<ListaLibros>();
 
 
         #endregion

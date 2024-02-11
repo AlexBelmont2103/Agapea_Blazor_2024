@@ -12,7 +12,7 @@
             <p>Regístrate en agapea.com y disfruta de todos sus beneficios y comodidades.</p>
 
             <div class="m-4">
-                <a class="btn btn-primary btn-lg" asp-controller="Cliente" asp-action="Registro">Registrate</a>
+                <a class="btn btn-primary btn-lg" onlick="@(()=> this.navManager.NavigateTo("/Cliente/Registro"))" asp-controller="Cliente" asp-action="Registro">Registrate</a>
             </div>
 
             <p class="mt-4"><b>Crea tus propias listas de libros</b> (<a href="">Consultar información</a>)</p>

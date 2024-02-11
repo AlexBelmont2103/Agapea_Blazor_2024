@@ -1,0 +1,84 @@
+﻿@page "/Cliente/Panel/MisOpiniones"
+@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+@inject IStorageService stgSvc;
+@inject IRestService restSvc;
+<div class="container">
+    <div class="row m-4">
+        <div class="col">
+            <h4><strong>Mis Opiniones</strong></h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <ul class="nav nav-tabs">
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Cliente/Panel/MisOpiniones/#Opispendientes" id="noaprobadas" @onclick="()=>{this.mostrarPendientes = true; StateHasChanged();}">Opiniones Pendientes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="aprobadas" @onclick="()=>{this.mostrarPendientes = false; StateHasChanged();}">Opiniones Realizadas</a>
+                </li>
+            </ul>
+            @if (mostrarPendientes)
+            {
+                <div class="mt-3" id="Opispendientes">
+
+
+                    @foreach (Opinion opi in opinionesPendientes)
+                    {
+
+                        <MiniOpinionPanelCliente opinion="opi" operarOpinionEvent="@ManejarOperacionOpinion" />
+
+                    }
+                </div>
+
+            }
+            else
+            {
+                <div class="mt-3" id="Opisaprobadas">
+
+                    @foreach (Opinion opi in opinionesAprobadas)
+                    {
+
+                        <MiniOpinionPanelCliente opinion="opi" operarOpinionEvent="@ManejarOperacionOpinion" />
+
+
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    List<Opinion> opinionesPendientes = new List<Opinion>();
+
+    List<Opinion> opinionesAprobadas = new List<Opinion>();
+
+    bool mostrarPendientes = true;
+
+    List<Opinion> opiniones = new List<Opinion>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.opiniones = this.stgSvc.RecuperarDatosCliente().OpinionesCliente.ToList<Opinion>();
+        Console.WriteLine("opiniones recuperadas: " + this.opiniones.Count);
+
+        this.opinionesPendientes = this.opiniones.FindAll(opi => !opi.EsModerada);
+        this.opinionesAprobadas = this.opiniones.FindAll(opi => opi.EsModerada);
+
+    }
+
+    public async Task ManejarOperacionOpinion(KeyValuePair<String, Opinion> datos)
+    {
+        Console.Write("Manejando operacion opinion");
+        RestMessage _resp = await this.restSvc.OperarOpinion(datos);
+        if (_resp.Codigo == 0)
+        {
+            this.stgSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+            this.stgSvc.AlmacenamientoJWT(_resp.Tokensesion);
+            StateHasChanged();
+        }
+    }
+}

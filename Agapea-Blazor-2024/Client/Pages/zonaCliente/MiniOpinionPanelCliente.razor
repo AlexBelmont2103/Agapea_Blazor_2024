@@ -1,0 +1,97 @@
+﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
+
+@inject IRestService restSvc
+@inject IStorageService stgSvc
+@inject IJSRuntime jsRuntime
+
+<div class="card">
+    <div class="card-header d-flex flex-row justify-content-end">
+        <button type="button" class="btn-close"></button>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-2"><img src="@this.libroOpinion.ImagenLibroBASE64" class="img-fluid rounded-start" alt="..." /></div>
+            <div class="col-md-4">
+                <h5 class="card-title">@this.libroOpinion.Titulo</h5>
+                <p class="card-text">@this.libroOpinion.Autores</p>
+                <p class="card-text"><small class="text-muted">@this.libroOpinion.Editorial</small></p>
+                <p class="card-text">
+
+                    @{
+                        if (this.opinion != null)
+                        {
+                            for (int i = 0; i < this.opinion.Valoracion; i++)
+                            {
+                                <i class="fa-solid fa-star">@i</i>
+                            }
+                        }
+                    }
+
+                </p>
+            </div>
+
+            <div class="col-md-6">
+                <p class="card-title">
+                    @{
+                        if (this.opinion != null)
+                        {
+                            for (int i = 0; i < this.opinion.Valoracion; i++)
+                            {
+                                <i class="fa-solid fa-star">@i</i>
+                            }
+                        }
+                    }
+
+                </p>
+
+                <p class="card-text">
+                    <textarea class="form-control" id="textoComentario" name="textoComentario" @bind="this.opinion.Comentario" placeholder="...aqui el comentario que has dejado del Libro...." disabled="@(!this.modoEdicion)">
+
+                    </textarea>
+                </p>
+                <!-- estos botones estarian ocultos si la opinion aun no esta aprobada...-->
+                @if (!this.opinion.EsModerada)
+                {
+                    <p class="card-text">
+                        <div class="d-flex flex-row justify-content-end">
+                            <button type="button" class="btn btn-sm btn-primary" @onclick="()=>{this.modoEdicion=true;StateHasChanged();} "><i class="fa-regular fa-pen-to-square"></i> Editar Opinion</button>
+                            <button type="button" class="btn btn-sm btn-danger"><i class="fa-regular fa-pen-to-square" @onclick="()=> OperarOpinion(this.stringeliminar)"></i> Eliminar Opinion</button>
+                            <button type="button" class="btn btn-sm btn-success mx-lg-2" id="btnGuardarComentario" @onclick="()=> OperarOpinion(this.stringeditar)" disabled="@(!this.modoEdicion)">Guardar Comentario</button>
+                        </div>
+                    </p>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Opinion? opinion { get; set; }
+    [Parameter]
+    public EventCallback<KeyValuePair<string, Opinion>> operarOpinionEvent { get; set; } = new EventCallback<KeyValuePair<String, Opinion>>();
+
+
+    public Libro? libroOpinion { get; set; }
+    public bool modoEdicion = false;
+
+    public string stringeliminar = "eliminar";
+
+    public string stringeditar = "modificar";
+
+    string textoOpinion = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.libroOpinion = await this.restSvc.RecuperarLibro(this.opinion.isbn13);
+    }
+
+    public void OperarOpinion(String operacion)
+    {
+        Console.WriteLine("Operando opinion");
+        this.opinion.EsModerada = false;
+        this.operarOpinionEvent.InvokeAsync(new KeyValuePair<string, Opinion>(operacion, this.opinion));
+
+    }
+}

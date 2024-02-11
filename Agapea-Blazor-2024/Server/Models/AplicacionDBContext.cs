@@ -29,6 +29,7 @@ namespace Agapea_Blazor_2024.Server.Models
         public DbSet<Municipio> Municipios { get; set; }
         public DbSet<PedidoPayPal> pedidoPayPal { get; set; }
         public DbSet<Opinion> Opiniones { get; set; }
+        public DbSet<ListaLibros> ListasLibros { get; set; }
 
         #endregion
 
@@ -143,6 +144,19 @@ namespace Agapea_Blazor_2024.Server.Models
             #region /// CREACION DE LA TABLA OPINION A PARTIR DE LA CLASE MODELO OPINION
             builder.Entity<Opinion>().ToTable("Opiniones");
             builder.Entity<Opinion>().HasKey((Opinion op) => op.IdOpinion);
+            #endregion
+            #region /// CREACION DE LA TABLA LISTASLIBROS A PARTIR DE LA CLASE MODELO LISTALIBROS ///
+
+            builder.Entity<ListaLibros>().ToTable("ListasLibros");
+            builder.Entity<ListaLibros>().HasKey((ListaLibros ll) => ll.IdLista);
+            builder.Entity<ListaLibros>().Property((ListaLibros ll) => ll.NombreLista).IsRequired().HasMaxLength(50);
+            builder.Entity<ListaLibros>().Property((ListaLibros ll) => ll.Libros)
+                .HasConversion(
+                               libros => JsonSerializer.Serialize<List<Libro>>(libros, (JsonSerializerOptions)null),
+                                              libros => JsonSerializer.Deserialize<List<Libro>>(libros, (JsonSerializerOptions)null)
+                                                                            ).HasColumnName("LibrosLista");
+
+
             #endregion
         }
         #endregion

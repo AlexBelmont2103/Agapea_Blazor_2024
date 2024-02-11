@@ -92,10 +92,26 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             return await _resp.Content.ReadFromJsonAsync<RestMessage>();
 
         }
+        public async Task<RestMessage> OperarOpinion(KeyValuePair<String, Opinion> datos)
+        {
+            Opinion opi = datos.Value;
+            String operacion = datos.Key;
+            String _jwt = this._storageService.RecuperarJWT();
+            this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Opinion>($"api/RESTCliente/OperarOpinion?operacion={operacion}", opi);
+            return await _resp.Content.ReadFromJsonAsync<RestMessage>();
+        }
         public async Task<String> RecuperarNombreLogin(string idcliente)
         {
             return await this._httpClient.GetStringAsync($"api/RESTCliente/RecuperarNombreLogin?idcliente={idcliente}");
 
+        }
+        public async Task<RestMessage> CrearLista(ListaLibros lista)
+        {
+            String _jwt = this._storageService.RecuperarJWT();
+            this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<ListaLibros>("api/RESTCliente/CrearLista", lista);
+            return await _resp.Content.ReadFromJsonAsync<RestMessage>();
         }
         #endregion
 
@@ -126,10 +142,8 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             return await this._httpClient
                             .GetFromJsonAsync<List<Opinion>>($"/api/RESTTienda/RecuperarOpiniones?isbn13={isbn13}") ?? new List<Opinion>();
         }
-
         #endregion
         #region ///// llamada endpoints zona Pedido /////
-
         public async Task<List<Provincia>> RecuperarProvincias()
         {
             try
@@ -166,7 +180,6 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Dictionary<string, string>>("/api/RESTTienda/FinalizarPedido", _dic);
             return await _resp.Content.ReadAsStringAsync();
         }
-
         #endregion
         #endregion
     }
