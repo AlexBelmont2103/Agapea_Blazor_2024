@@ -53,10 +53,10 @@
                         <form method="post">
                             <div class="bg-gray border border-5 border w-75 h-100 d-flex flex-row">
                                 <div class="p-1 flex-fill">
-                                    <input class="border-0 w-100 h-100" type="text" name="cajatext" placeholder="Buscar por libro, autor, ISBN..." />
+                                    <input class="border-0 w-100 h-100" type="text" name="cajatext" @bind="this.busqueda" placeholder="Buscar por libro, autor, ISBN..." />
                                 </div>
                                 <div class="bg-primary p-2 border border-5 border-end-0 border-top-0 border-bottom-0">
-                                    <a id="botonBuscar" onclick="javascript:document.forms[0].submit()"><img src="/images/lupa.png" width="auto" height="20" /></a>
+                                    <a id="botonBuscar" onclick="@(()=> this.navigate.NavigateTo($"/Tienda/BusquedaLibros/{this.busqueda}"))"><img src="/images/lupa.png" width="auto" height="20" /></a>
                                 </div>
                             </div>
 
@@ -112,6 +112,7 @@
     public Cliente clienteLogged { get; set; }
     public List<ItemPedido> _listaItems { get; set; } = new List<ItemPedido>();
     public Decimal Subtotal { get; set; } = 0;
+    public String? busqueda { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

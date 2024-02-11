@@ -58,6 +58,26 @@ namespace Agapea_Blazor_2024.Server.Controllers
             }
         }
         [HttpGet]
+        public List<Libro> RecuperarLibrosBusqueda([FromQuery] String busqueda)
+        {
+            try
+            {
+                return this._dbContext
+                            .Libros
+                            .Where(
+                             (Libro unlibro) => unlibro.Titulo.Contains(busqueda)
+                                             || unlibro.Autores.Contains(busqueda)
+                                             || unlibro.ISBN13.Contains(busqueda)
+                                  )
+                            .ToList<Libro>();
+            }
+            catch (Exception ex)
+            {
+
+                return new List<Libro>();
+            }
+        }
+        [HttpGet]
         public List<Opinion> RecuperarOpiniones([FromQuery] String isbn13)
         {
             try

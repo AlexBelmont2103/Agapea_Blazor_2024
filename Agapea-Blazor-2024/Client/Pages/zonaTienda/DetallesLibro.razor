@@ -239,7 +239,7 @@
     public async Task OnClickEstrella(int valor)
     {
 
-        nuevaOpinion.Valoracion = valor
+        nuevaOpinion.Valoracion = valor;
         await this.jsSvc.InvokeVoidAsync("window.adminFormModal.ShowModal", "modalComentarios");
     }
 

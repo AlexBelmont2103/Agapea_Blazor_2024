@@ -116,6 +116,11 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             return await this._httpClient
                             .GetFromJsonAsync<Libro>($"/api/RESTTienda/RecuperarLibro?isbn13={isbn13}") ?? new Libro();
         }
+        public async Task<List<Libro>> RecuperarLibrosBusqueda(string busqueda)
+        {
+            return await this._httpClient
+                            .GetFromJsonAsync<List<Libro>>($"/api/RESTTienda/RecuperarLibrosBusqueda?busqueda={busqueda}") ?? new List<Libro>();
+        }
         public async Task<List<Opinion>> RecuperarOpiniones(string isbn13)
         {
             return await this._httpClient
@@ -161,11 +166,6 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Dictionary<string, string>>("/api/RESTTienda/FinalizarPedido", _dic);
             return await _resp.Content.ReadAsStringAsync();
         }
-
-
-
-
-
 
         #endregion
         #endregion
