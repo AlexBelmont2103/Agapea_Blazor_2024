@@ -1,0 +1,52 @@
+﻿@inject IJSRuntime jsSvc
+<div class="container">
+    <div id="modalComentarios" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 className="modal-title" id="myModalLabel">Tu nueva opinion:</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div id="mensaje-valoracion-agregada"></div>
+                </div>
+                <div id="nuevoComentario" class="modal-body">
+                    <div class="form-group">
+                        <p>Añade un comentario sobre: <span style="color:blue;">@this.libro.Titulo</span></p>
+                        <textarea class="form-control" id="textoComentario" name="textoComentario" @bind="@opinion.Comentario"  placeholder="Déjanos un comentario"></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button @onclick="GuardarComentario" type="button" id="enviarComentario" class="btn btn-primary">Guardar comentario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Libro libro { get; set; }
+    [Parameter]
+    public Opinion opinion { get; set; }
+    [Parameter]
+    public EventCallback<Opinion> OnEnviarOpinion { get; set; }
+
+    public void GuardarComentario()
+    {
+        //Tenemos que comprobar si el comentario son al menos 15 palabras
+        if (opinion.Comentario.Length < 15)
+        {
+            var mensaje = "El comentario debe tener al menos 15 palabras";
+            //Usamos el servicio de javascript para mostrar el mensaje
+            jsSvc.InvokeVoidAsync("alert", mensaje);
+
+        }
+        else
+        {
+
+            OnEnviarOpinion.InvokeAsync(opinion);
+        }
+        
+    }
+
+}

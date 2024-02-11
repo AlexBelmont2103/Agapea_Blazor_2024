@@ -432,6 +432,57 @@ namespace Agapea_Blazor_2024.Server.Controllers
             }
 
         }
+        [HttpGet]
+        [Route("RecuperarNombreLogin")]
+        public async Task<String> RecuperarNombreLogin([FromQuery] String idcliente)
+        {
+            try
+            {
+                MiClienteIdentity _cliente = await this._userManagerService.FindByIdAsync(idcliente);
+                return _cliente.UserName;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+
+        }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("UploadOpinion")]
+        public async Task<RestMessage> UploadOpinion(Opinion opinion)
+        {
+            try
+            {
+                this._dbcontext.Opiniones.Add(opinion);
+                this._dbcontext.SaveChanges();
+                //Generamos cliente con el id que se encuentra en la opinion
+                Cliente _cliente = await this.__GenerarClienteActualizado(opinion.IdCliente);
+                //Generamos token de sesion y devolvemos respuesta
+                String _jwt = this.__GeneraJWT(_cliente.Nombre, _cliente.Apellidos, _cliente.Credenciales.Email, _cliente.IdCliente);
+                return new RestMessage()
+                {
+                    Codigo = 0,
+                    Mensaje = "Opinion subida OK",
+                    Error = "",
+                    Tokensesion = _jwt,
+                    DatosCliente = _cliente,
+                    OtrosDatos = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new RestMessage()
+                {
+                    Codigo = 1,
+                    Mensaje = "Error al subir opinion",
+                    Error = ex.Message,
+                    Tokensesion = null,
+                    DatosCliente = null,
+                    OtrosDatos = null
+                };
+            }
+        }
         #endregion
         //Si quiero restringir el acceso a un metodo de un controlador a usuarios autenticados, debo decorar el metodo con el atributo [Authorize]
 

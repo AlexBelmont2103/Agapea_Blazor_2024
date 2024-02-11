@@ -82,6 +82,21 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             return await _resp.Content.ReadFromJsonAsync<RestMessage>();
 
         }
+        public async Task<RestMessage> UploadOpinion(Opinion opinion)
+        {
+            //Recupero el jwt para enviarlo en la cabecera de la peticion
+            string _jwt = this._storageService.RecuperarJWT();
+            this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+            //Hago la peticion al servidor
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Opinion>("api/RESTCliente/UploadOpinion", opinion);
+            return await _resp.Content.ReadFromJsonAsync<RestMessage>();
+
+        }
+        public async Task<String> RecuperarNombreLogin(string idcliente)
+        {
+            return await this._httpClient.GetStringAsync($"api/RESTCliente/RecuperarNombreLogin?idcliente={idcliente}");
+
+        }
         #endregion
 
         #region ///// llamada endpoints zona Tienda /////
@@ -101,7 +116,11 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             return await this._httpClient
                             .GetFromJsonAsync<Libro>($"/api/RESTTienda/RecuperarLibro?isbn13={isbn13}") ?? new Libro();
         }
-
+        public async Task<List<Opinion>> RecuperarOpiniones(string isbn13)
+        {
+            return await this._httpClient
+                            .GetFromJsonAsync<List<Opinion>>($"/api/RESTTienda/RecuperarOpiniones?isbn13={isbn13}") ?? new List<Opinion>();
+        }
 
         #endregion
         #region ///// llamada endpoints zona Pedido /////
@@ -142,6 +161,10 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<Dictionary<string, string>>("/api/RESTTienda/FinalizarPedido", _dic);
             return await _resp.Content.ReadAsStringAsync();
         }
+
+
+
+
 
 
         #endregion

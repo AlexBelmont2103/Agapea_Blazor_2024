@@ -87,16 +87,131 @@
         </div>
     </div>
 </div>
+<!--    /// ZONA DE COMENTARIOS ///   -->
+<div class="row">
+    <div class="col">
+        <div id="secComentarios" class="contsocial">
+
+            <div class="darValoracion sinBordTop">
+                <h4>Danos tu valoración de este libro</h4>
+                <div id="estrellas" class="d-flex flex-row justify-content-center">
+                    <ul class="list-group list-group-horizontal">
+
+                        @if (clientelogged != null && clienteTieneLibro)
+                        {
+
+                            @for (int a = 1; a <= 5; a++)
+                            {
+
+                                <li class="list-group-item">
+                                    @{int _valor = a;}
+                                    <button @onclick="@(()=>OnClickEstrella(_valor))" value="@a">@a</button>
+
+                                </li>
+
+
+                            }
+                        }
+                        else
+                        {
+                            <p>DEBES ESTAR LOGGUEADO Y HABER COMPRADO EL LIBRO PARA PODER OPINAR</p>
+
+
+                        }
+
+                    </ul>
+                </div>
+            </div>
+
+            <hr />
+
+            <div id="contenedorResumenComentarios" class="">
+                <div class="darValoracion sinPadBot">
+                    <div class="d-flex flex-row justify-content-center">
+                        <!-- aqui tienes q mostrar tantas estrellas como valoracion media tenga el libro...-->
+                        @{
+                            if (opiniones.Count > 0)
+                            {
+                                int _valoracionMedia = 0;
+                                foreach (Opinion opi in opiniones)
+                                {
+                                    _valoracionMedia += opi.Valoracion;
+                                }
+                                _valoracionMedia = _valoracionMedia / opiniones.Count;
+                                for (int a = 1; a <= _valoracionMedia; a++)
+                                {
+                                    <i class="fa-solid fa-star" style="color:#0d6efd;"></i>
+                                }
+                            }
+
+                        }
+                        <span class="numeroValoraciones">@opiniones.Count valoractiones - y opiniones</span>
+                    </div>
+                    <div class="separadorValoracion"></div>
+
+                    <div id="listacomentarios mt-3">
+                        <!-- aqui la lista de comentarios sobre el libro de los distintos clientes...-->
+                        @if (opiniones.Count > 0)
+                        {
+                            foreach (Opinion unaopinion in opiniones)
+                            {
+                                if(unaopinion.EsModerada)
+                                {
+                                    <MiniOpinion opi="@unaopinion" />
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-info" role="alert">
+                                Este libro no tiene opiniones todavia
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--///MODAL///-->
+        <ModalComentario libro="@libro" opinion="@nuevaOpinion" OnEnviarOpinion="@ManejarOpinionEvent"></ModalComentario>
+    </div>
+</div>
 
 @code {
     [Parameter]
     public String isbn13 { get; set; }
 
     public Libro libro { get; set; } = new Libro();
+    public Cliente? clientelogged { get; set; }
+    public bool clienteTieneLibro { get; set; } = false;
+    public List<Opinion> opiniones { get; set; } = new List<Opinion>();
+    public Opinion nuevaOpinion { get; set; } = new Opinion();
 
     protected override async Task OnInitializedAsync()
     {
         this.libro = await this.restSvc.RecuperarLibro(this.isbn13);
+        this.opiniones = await this.restSvc.RecuperarOpiniones(this.isbn13);
+        Console.WriteLine(this.libro.Titulo);
+        this.clientelogged = this.storageSvc.RecuperarDatosCliente();
+        if (this.clientelogged == null)
+        {
+            this.clientelogged = new Cliente();
+        }
+        this.nuevaOpinion.IdCliente = this.clientelogged.IdCliente;
+        this.nuevaOpinion.isbn13 = this.libro.ISBN13;
+        //Recorremos cada pedido del cliente y comprobamos si alguno de ellos contiene el libro que estamos viendo
+        foreach (var pedido in this.clientelogged.PedidosCliente)
+        {
+            foreach (var item in pedido.ElementosPedido)
+            {
+                if (item.LibroItem.ISBN13 == this.libro.ISBN13)
+                {
+                    this.clienteTieneLibro = true;
+                    break;
+                }
+            }
+        }
+
     }
     private void AddLibroPedido()
     {
@@ -111,4 +226,22 @@
         }
 
     }
+    public async Task ManejarOpinionEvent(Opinion opinion)
+    {        
+        RestMessage _resp = await this.restSvc.UploadOpinion(opinion);
+        if (_resp.Codigo == 0)
+        {
+            this.storageSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+            this.storageSvc.AlmacenamientoJWT(_resp.Tokensesion);
+            await this.jsSvc.InvokeVoidAsync("window.adminFormModal.HideModal", "modalComentarios");
+            this.jsSvc.InvokeVoidAsync("alert", "Opinion guardada correctamente. Pendiente de ser moderada por el administrador");
+        }
+    }
+    public async Task OnClickEstrella(int valor)
+    {
+
+        nuevaOpinion.Valoracion = valor
+        await this.jsSvc.InvokeVoidAsync("window.adminFormModal.ShowModal", "modalComentarios");
+    }
+
 }

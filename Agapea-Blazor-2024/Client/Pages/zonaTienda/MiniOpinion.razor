@@ -1,0 +1,27 @@
+﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces;
+@inject IRestService restService
+
+<div class="card">
+
+    <div class="card-header d-flex flex-row justify-content-between">
+        <div class="d-flex flex-column">
+            <span class="text-muted">@opi.IdCliente</span>
+            <ul class="list-group list-group-horizontal">
+                @for (int i = 0; i < this.opi.Valoracion; i++)
+                {
+                    <li class="list-group-item"><i class="fa-star fa-solid" style="color: red; font-size: 0.5em"></i></li>
+                }
+            </ul>
+        </div>
+        <div>@this.opi.Fecha</div>
+    </div>
+
+    <div class="card-body">
+        <p class="card-text">@this.opi.Comentario</p>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Opinion opi { get; set; }
+}

@@ -13,12 +13,15 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         Task<RestMessage> OperarDireccion(Direccion direccion, String operacion);
         Task<RestMessage> UploadImagen(String imagenbase64, String idcliente);
         Task<RestMessage> UpdateCliente(Cliente datoscliente);
+        Task<String> RecuperarNombreLogin(String idcliente);
+        Task<RestMessage> UploadOpinion(Opinion opinion);
         #endregion
 
         #region metodos/props para zonaTienda
         Task<List<Libro>> RecuperarLibros(String idcat);
         Task<Libro> RecuperarLibro(String isbn13);
         Task<List<Categoria>> RecuperarCategorias(String idcat);
+        Task<List<Opinion>> RecuperarOpiniones(String isbn13);
         #endregion
         #region metodos para zonaPedido
         Task<List<Provincia>> RecuperarProvincias();
