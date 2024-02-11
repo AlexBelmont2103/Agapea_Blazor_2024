@@ -191,7 +191,6 @@
     {
         this.libro = await this.restSvc.RecuperarLibro(this.isbn13);
         this.opiniones = await this.restSvc.RecuperarOpiniones(this.isbn13);
-        Console.WriteLine(this.libro.Titulo);
         this.clientelogged = this.storageSvc.RecuperarDatosCliente();
         if (this.clientelogged == null)
         {
