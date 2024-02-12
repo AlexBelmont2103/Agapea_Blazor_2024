@@ -578,6 +578,46 @@ namespace Agapea_Blazor_2024.Server.Controllers
                 };
             }
         }
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Route("UpdateListasCliente")]
+        public async Task<RestMessage> UpdateListasCliente(List<ListaLibros> listas)
+        {
+            try
+            {
+                foreach (ListaLibros _lista in listas)
+                {
+                    ListaLibros _listaModif = this._dbcontext.ListasLibros.Where((ListaLibros l) => l.IdLista == _lista.IdLista).Single();
+                    _listaModif.NombreLista = _lista.NombreLista;
+                    _listaModif.Libros = _lista.Libros;
+                }
+                this._dbcontext.SaveChanges();
+                //Recuperamos cliente actualizado y generamos token de sesion
+                Cliente _cliente = await this.__GenerarClienteActualizado(listas[0].IdCliente);
+                String _jwt = this.__GeneraJWT(_cliente.Nombre, _cliente.Apellidos, _cliente.Credenciales.Email, _cliente.IdCliente);
+                return new RestMessage()
+                {
+                    Codigo = 0,
+                    Mensaje = "Listas de libros actualizadas OK",
+                    Error = "",
+                    Tokensesion = _jwt,
+                    DatosCliente = _cliente,
+                    OtrosDatos = null
+                };
+            }
+            catch (Exception ex)
+            {
+                return new RestMessage()
+                {
+                    Codigo = 1,
+                    Mensaje = "Error al actualizar listas de libros",
+                    Error = ex.Message,
+                    Tokensesion = null,
+                    DatosCliente = null,
+                    OtrosDatos = null
+                };
+            }
+        }
         #endregion
         //Si quiero restringir el acceso a un metodo de un controlador a usuarios autenticados, debo decorar el metodo con el atributo [Authorize]
 

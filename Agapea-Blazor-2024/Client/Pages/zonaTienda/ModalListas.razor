@@ -1,6 +1,7 @@
 ﻿@using Agapea_Blazor_2024.Client.Models.Services.Interfaces
 @inject IRestService restSvc
 @inject IStorageService stgSvc
+@inject IJSRuntime jsSvc
 
 <div class="container">
     <div id="modalListas" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -22,7 +23,7 @@
                     }
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="enviarComentario" class="btn btn-primary">Guardar</button>
+                    <button type="button" id="enviarComentario" @onclick="GuardarCambios" class="btn btn-primary">Guardar</button>
                 </div>
             </div>
         </div>
@@ -60,6 +61,22 @@
         {
             // Elimina el libro de la lista si el checkbox no está marcado
             lista.Libros.RemoveAll(libro => libro.ISBN13 == this.libro.ISBN13);
+        }
+    }
+    public async Task GuardarCambios()
+    {
+        RestMessage _resp = await restSvc.UpdateListasCliente(clientelogged.ListasCliente);
+        if (_resp.Codigo == 0)
+        {
+            this.stgSvc.AlmacenamientoDatosCliente(_resp.DatosCliente);
+            this.stgSvc.AlmacenamientoJWT(_resp.Tokensesion);
+            //Cerrar modal
+            await jsSvc.InvokeVoidAsync("window.adminFormModal.HideModal", "modalListas");
+        }
+        else
+        {
+            //Lanzamos mensaje de alerta
+            await jsSvc.InvokeVoidAsync("alert", _resp.Error);
         }
     }
 }

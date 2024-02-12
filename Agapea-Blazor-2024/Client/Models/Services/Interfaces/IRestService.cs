@@ -17,6 +17,7 @@ namespace Agapea_Blazor_2024.Client.Models.Services.Interfaces
         Task<RestMessage> UploadOpinion(Opinion opinion);
         Task<RestMessage> OperarOpinion(KeyValuePair<String, Opinion> datos);
         Task<RestMessage> CrearLista(ListaLibros lista);
+        Task<RestMessage> UpdateListasCliente(List<ListaLibros> listas);
         #endregion
 
         #region metodos/props para zonaTienda

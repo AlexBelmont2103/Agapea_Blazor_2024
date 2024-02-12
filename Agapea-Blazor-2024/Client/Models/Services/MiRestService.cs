@@ -113,6 +113,13 @@ namespace Agapea_Blazor_2024.Client.Models.Services
             HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<ListaLibros>("api/RESTCliente/CrearLista", lista);
             return await _resp.Content.ReadFromJsonAsync<RestMessage>();
         }
+        public async Task<RestMessage> UpdateListasCliente(List<ListaLibros> listas)
+        {
+            String _jwt = this._storageService.RecuperarJWT();
+            this._httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _jwt);
+            HttpResponseMessage _resp = await this._httpClient.PostAsJsonAsync<List<ListaLibros>>("api/RESTCliente/UpdateListasCliente", listas);
+            return await _resp.Content.ReadFromJsonAsync<RestMessage>();
+        }
         #endregion
 
         #region ///// llamada endpoints zona Tienda /////
